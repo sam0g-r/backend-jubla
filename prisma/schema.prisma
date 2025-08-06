@@ -1,0 +1,394 @@
+generator client {
+  provider             = "prisma-client-py"
+  output               = "/generated/client"
+  recursive_type_depth = "5"
+  interface            = "sync"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Country {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  code      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  events    Event[]
+  states    State[]
+  users     User[]
+}
+
+model State {
+  id        String    @id @default(cuid())
+  name      String
+  countryId String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  cities    City[]
+  events    Event[]
+  country   Country   @relation(fields: [countryId], references: [id])
+  users     User[]
+}
+
+model City {
+  id        String   @id @default(cuid())
+  name      String
+  stateId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  state     State    @relation(fields: [stateId], references: [id])
+}
+
+model User {
+  id                 String                  @id @default(cuid())
+  email              String                  @unique
+  firstname          String
+  lastname           String
+  birthdate          DateTime
+  countryId          String
+  stateId            String
+  church             String
+  phone              String
+  password           String
+  isActive           Boolean                 @default(true)
+  isVerified         Boolean                 @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  emailVerifications EmailVerification[]
+  files              Files[]
+  oAuthProviders     OAuthProvider[]
+  passwordResets     PasswordReset[]
+  payments           Payment[]
+  approvedOrders     PurchaseOrder[]         @relation("ApprovedOrders")
+  createdOrders      PurchaseOrder[]         @relation("CreatedOrders")
+  paidOrders         PurchaseOrder[]         @relation("PaidOrders")
+  responsibleOrders  PurchaseOrder[]         @relation("ResponsibleOrders")
+  reservations       Reservations[]
+  sessions           Session[]
+  country            Country                 @relation(fields: [countryId], references: [id])
+  state              State                   @relation(fields: [stateId], references: [id])
+  medicalRecord      UserMedicalInformation?
+  roles              UserRole[]
+  OrganizationToUser OrganizationToUser[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model OAuthProvider {
+  id         String   @id @default(cuid())
+  userId     String
+  provider   String
+  providerId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model UserMedicalInformation {
+  id                           String   @id @default(cuid())
+  userId                       String   @unique
+  hasPatologies                Boolean  @default(false)
+  hasMedication                Boolean  @default(false)
+  hasAllergies                 Boolean  @default(false)
+  hasMedicationAllergies       Boolean  @default(false)
+  hasSurgeryHistory            Boolean  @default(false)
+  hasDaietaryRestrictions      Boolean  @default(false)
+  patologies                   String?
+  medication                   String?
+  allergies                    String?
+  medicationAllergies          String?
+  surgeryHistory               String?
+  dietaryRestrictions          String?
+  emergencyContactName         String
+  emergencyContactPhone        String
+  emergencyContactRelationship String
+  emergencyContactEmail        String
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+  user                         User     @relation(fields: [userId], references: [id])
+}
+
+model Role {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  description     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+}
+
+model Permission {
+  id              String           @id @default(cuid())
+  module          String
+  action          String
+  description     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+
+  @@unique([module, action])
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+model UserRole {
+  id         String   @id @default(cuid())
+  userId     String
+  roleId     String
+  eventId    String?
+  assignedAt DateTime @default(now())
+  event      Event?   @relation(fields: [eventId], references: [id])
+  role       Role     @relation(fields: [roleId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Organization {
+  id                 String               @id @default(cuid())
+  name               String               @unique
+  description        String?
+  logoUrl            String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  events             Event[]
+  OrganizationToUser OrganizationToUser[]
+}
+
+model Event {
+  id                     String              @id @default(cuid())
+  organizationId         String
+  title                  String
+  slug                   String              @unique
+  description            String
+  startDate              DateTime
+  endDate                DateTime
+  countryId              String
+  stateId                String
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  currency               String              @default("USD")
+  isActive               Boolean             @default(true)
+  maxCapacity            Int?
+  pastoralLetterDeadline DateTime?
+  paymentDeadline        DateTime?
+  price                  Float               @default(0)
+  country                Country             @relation(fields: [countryId], references: [id])
+  organization           Organization        @relation(fields: [organizationId], references: [id])
+  state                  State               @relation(fields: [stateId], references: [id])
+  financialMovement      FinancialMovement[]
+  purchaseOrders         PurchaseOrder[]
+  reservations           Reservations[]
+  UserRole               UserRole[]
+}
+
+model Reservations {
+  id                       String                 @id @default(cuid())
+  userId                   String
+  termsAccepted            Boolean                @default(false)
+  imageRightsAccepted      Boolean                @default(false)
+  eventId                  String
+  reservationDate          DateTime               @default(now())
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  pastoralLetterUploaded   Boolean                @default(false)
+  pastoralLetterUploadedAt DateTime?
+  paymentCompletedAt       DateTime?
+  paymentStatus            PaymentStatus          @default(PENDING)
+  status                   ReservationStatus      @default(PENDING_BOTH)
+  financialMovement        FinancialMovement[]
+  event                    Event                  @relation(fields: [eventId], references: [id])
+  user                     User                   @relation(fields: [userId], references: [id])
+  payments                 ReservationsPayments[]
+
+  @@unique([userId, eventId])
+}
+
+model Files {
+  id           String   @id @default(cuid())
+  name         String
+  mimeType     String
+  driveFileId  String
+  url          String
+  uploadedAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  uploadedById String
+  fileableId   String
+  fileableType String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+
+  @@index([fileableId, fileableType])
+}
+
+model Payment {
+  id                   String                 @id @default(cuid())
+  userId               String
+  amount               Float
+  currency             String
+  paymentMethod        String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  status               PaymentStatus          @default(PENDING)
+  financialMovement    FinancialMovement[]
+  user                 User                   @relation(fields: [userId], references: [id])
+  paymentDetails       PaypalPaymentDetail?
+  reservationsPayments ReservationsPayments[]
+}
+
+model ReservationsPayments {
+  id            String       @id @default(cuid())
+  reservationId String
+  paymentId     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  payment       Payment      @relation(fields: [paymentId], references: [id])
+  reservation   Reservations @relation(fields: [reservationId], references: [id])
+
+  @@unique([reservationId, paymentId])
+}
+
+model FinancialMovement {
+  id                               String                             @id @default(cuid())
+  eventId                          String
+  type                             FinancialMovementType
+  concept                          String
+  amount                           Float
+  date                             DateTime                           @default(now())
+  origin                           String?
+  reservationId                    String?
+  paymentId                        String?
+  createdAt                        DateTime                           @default(now())
+  updatedAt                        DateTime                           @updatedAt
+  event                            Event                              @relation(fields: [eventId], references: [id])
+  payment                          Payment?                           @relation(fields: [paymentId], references: [id])
+  reservation                      Reservations?                      @relation(fields: [reservationId], references: [id])
+  FinancialMovementToPurchaseOrder FinancialMovementToPurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id                               String                             @id @default(cuid())
+  eventId                          String
+  createdById                      String
+  approvedById                     String?
+  paidById                         String?
+  responsibleId                    String?
+  provider                         String
+  concept                          String
+  totalAmount                      Float
+  currency                         String
+  status                           PurchaseOrderStatus                @default(PENDING)
+  orderDate                        DateTime                           @default(now())
+  notes                            String?
+  createdAt                        DateTime                           @default(now())
+  updatedAt                        DateTime                           @updatedAt
+  approvedBy                       User?                              @relation("ApprovedOrders", fields: [approvedById], references: [id])
+  createdBy                        User                               @relation("CreatedOrders", fields: [createdById], references: [id])
+  event                            Event                              @relation(fields: [eventId], references: [id])
+  paidBy                           User?                              @relation("PaidOrders", fields: [paidById], references: [id])
+  responsible                      User?                              @relation("ResponsibleOrders", fields: [responsibleId], references: [id])
+  FinancialMovementToPurchaseOrder FinancialMovementToPurchaseOrder[]
+}
+
+model PaypalPaymentDetail {
+  id             String   @id @default(cuid())
+  paymentId      String   @unique
+  orderId        String   @unique
+  captureId      String?
+  payerId        String?
+  payerEmail     String?
+  rawData        Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  refundId       String?
+  refundedAmount Float?
+  payment        Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model FinancialMovementToPurchaseOrder {
+  A                 String
+  B                 String
+  FinancialMovement FinancialMovement @relation(fields: [A], references: [id], onDelete: Cascade)
+  PurchaseOrder     PurchaseOrder     @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_FinancialMovementToPurchaseOrder_AB_pkey")
+  @@index([B], map: "_FinancialMovementToPurchaseOrder_B_index")
+  @@map("_FinancialMovementToPurchaseOrder")
+}
+
+model OrganizationToUser {
+  A            String
+  B            String
+  Organization Organization @relation(fields: [A], references: [id], onDelete: Cascade)
+  User         User         @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_OrganizationToUser_AB_pkey")
+  @@index([B], map: "_OrganizationToUser_B_index")
+  @@map("_OrganizationToUser")
+}
+
+enum FinancialMovementType {
+  INCOME
+  EXPENSE
+}
+
+enum PurchaseOrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+  CANCELLED
+}
+
+enum ReservationStatus {
+  PENDING_PAYMENT
+  PENDING_PASTORAL_LETTER
+  PENDING_BOTH
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
