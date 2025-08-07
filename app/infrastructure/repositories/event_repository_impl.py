@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import UUID
 from app.domain.entities.event import Event
 from app.domain.repositories.event_repository import EventRepository
 
@@ -17,7 +16,7 @@ class EventRepositoryImpl(EventRepository):
         self._events[str(event.id)] = event
         return event
     
-    async def get_by_id(self, event_id: UUID) -> Optional[Event]:
+    async def get_by_id(self, event_id: str) -> Optional[Event]:
         return self._events.get(str(event_id))
     
     async def get_by_slug(self, slug: str) -> Optional[Event]:
@@ -31,7 +30,7 @@ class EventRepositoryImpl(EventRepository):
             self._events[str(event.id)] = event
         return event
     
-    async def delete(self, event_id: UUID) -> bool:
+    async def delete(self, event_id: str) -> bool:
         if str(event_id) in self._events:
             del self._events[str(event_id)]
             return True

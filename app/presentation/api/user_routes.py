@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from uuid import UUID
 from app.application.use_cases.user_use_cases import UserUseCases
 from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserResponseDTO
 from app.presentation.dependencies import get_user_use_cases
@@ -11,7 +10,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/{user_id}", response_model=UserResponseDTO)
 async def get_user(
-    user_id: UUID,
+    user_id: str,
     user_use_cases: UserUseCases = Depends(get_user_use_cases)
 ):
     try:
@@ -34,7 +33,7 @@ async def list_users(
 
 @router.put("/{user_id}", response_model=UserResponseDTO)
 async def update_user(
-    user_id: UUID,
+    user_id: str,
     user_data: UpdateUserDTO,
     user_use_cases: UserUseCases = Depends(get_user_use_cases)
 ):
@@ -49,7 +48,7 @@ async def update_user(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    user_id: UUID,
+    user_id: str,
     user_use_cases: UserUseCases = Depends(get_user_use_cases)
 ):
     try:

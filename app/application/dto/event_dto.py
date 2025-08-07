@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 class CreateEventDTO(BaseModel):
     title: str
@@ -22,7 +21,7 @@ class UpdateEventDTO(BaseModel):
     is_active: Optional[bool] = None
 
 class EventResponseDTO(BaseModel):
-    id: UUID
+    id: str
     title: str
     slug: str
     description: str

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from uuid import UUID
 from app.domain.entities.registration import Registration, PaymentStatus
 
 class RegistrationRepository(ABC):
@@ -9,11 +8,11 @@ class RegistrationRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_by_id(self, registration_id: UUID) -> Optional[Registration]:
+    async def get_by_id(self, registration_id: str) -> Optional[Registration]:
         pass
     
     @abstractmethod
-    async def get_by_user_and_event(self, user_id: UUID, event_id: UUID) -> Optional[Registration]:
+    async def get_by_user_and_event(self, user_id: str, event_id: str) -> Optional[Registration]:
         pass
     
     @abstractmethod
@@ -21,15 +20,15 @@ class RegistrationRepository(ABC):
         pass
     
     @abstractmethod
-    async def delete(self, registration_id: UUID) -> bool:
+    async def delete(self, registration_id: str) -> bool:
         pass
     
     @abstractmethod
-    async def list_by_event(self, event_id: UUID, skip: int = 0, limit: int = 100) -> List[Registration]:
+    async def list_by_event(self, event_id: str, skip: int = 0, limit: int = 100) -> List[Registration]:
         pass
     
     @abstractmethod
-    async def list_by_user(self, user_id: UUID, skip: int = 0, limit: int = 100) -> List[Registration]:
+    async def list_by_user(self, user_id: str, skip: int = 0, limit: int = 100) -> List[Registration]:
         pass
     
     @abstractmethod
@@ -37,5 +36,5 @@ class RegistrationRepository(ABC):
         pass
     
     @abstractmethod
-    async def count_by_event(self, event_id: UUID) -> int:
+    async def count_by_event(self, event_id: str) -> int:
         pass 

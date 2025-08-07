@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import UUID
 from datetime import datetime
 from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
@@ -25,7 +24,7 @@ class UserRepositoryImpl(UserRepository):
             })
             
             return User(
-                id=UUID(db_user.id),
+                id=str(db_user.id),
                 email=db_user.email,
                 firstname=db_user.firstname,
                 lastname=db_user.lastname,
@@ -35,7 +34,7 @@ class UserRepositoryImpl(UserRepository):
                 updated_at=db_user.updated_at
             )
     
-    async def get_by_id(self, user_id: UUID) -> Optional[User]:
+    async def get_by_id(self, user_id: str) -> Optional[User]:
         """Obtener usuario por ID"""
         async with prisma_client as client:
             db_user = await client.client.user.find_unique(
@@ -46,7 +45,7 @@ class UserRepositoryImpl(UserRepository):
                 return None
                 
             return User(
-                id=UUID(db_user.id),
+                id=str(db_user.id),
                 email=db_user.email,
                 firstname=db_user.firstname,
                 lastname=db_user.lastname,
@@ -67,7 +66,7 @@ class UserRepositoryImpl(UserRepository):
                 return None
                 
             return User(
-                id=UUID(db_user.id),
+                id=str(db_user.id),
                 email=db_user.email,
                 firstname=db_user.firstname,
                 lastname=db_user.lastname,
@@ -93,7 +92,7 @@ class UserRepositoryImpl(UserRepository):
             )
             
             return User(
-                id=UUID(db_user.id),
+                id=str(db_user.id),
                 email=db_user.email,
                 firstname=db_user.firstname,
                 lastname=db_user.lastname,
@@ -103,7 +102,7 @@ class UserRepositoryImpl(UserRepository):
                 updated_at=db_user.updated_at
             )
     
-    async def delete(self, user_id: UUID) -> bool:
+    async def delete(self, user_id: str) -> bool:
         """Eliminar usuario"""
         async with prisma_client as client:
             try:
@@ -125,7 +124,7 @@ class UserRepositoryImpl(UserRepository):
             
             return [
                 User(
-                    id=UUID(db_user.id),
+                    id=str(db_user.id),
                     email=db_user.email,
                     firstname=db_user.firstname,
                     lastname=db_user.lastname,

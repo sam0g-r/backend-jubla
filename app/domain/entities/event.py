@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 @dataclass
 class Event:
-    id: UUID
+    id: str
     title: str
     slug: str
     description: str

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 @dataclass
 class User:
-    id: UUID
+    id: str
     firstname: str
     lastname: str
     email: str

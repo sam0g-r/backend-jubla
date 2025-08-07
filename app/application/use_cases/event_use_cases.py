@@ -1,7 +1,5 @@
 from typing import Optional, List
-from uuid import UUID
 from datetime import datetime
-import uuid
 from app.domain.entities.event import Event
 from app.domain.repositories.event_repository import EventRepository
 from app.application.dto.event_dto import CreateEventDTO, UpdateEventDTO, EventResponseDTO
@@ -18,8 +16,9 @@ class EventUseCases:
             raise EventAlreadyExistsError(f"Event with slug {event_data.slug} already exists")
         
         # Crear entidad de evento
+        generate_id = cuid_wrapper()
         event = Event(
-            id=uuid.uuid4(),
+            id=generate_id(),
             title=event_data.title,
             slug=event_data.slug,
             description=event_data.description,
@@ -36,7 +35,7 @@ class EventUseCases:
         created_event = await self.event_repository.create(event)
         return EventResponseDTO.from_entity(created_event)
     
-    async def get_by_id(self, event_id: UUID) -> Optional[EventResponseDTO]:
+    async def get_by_id(self, event_id: str) -> Optional[EventResponseDTO]:
         event = await self.event_repository.get_by_id(event_id)
         if not event:
             raise EventNotFoundError(f"Event with id {event_id} not found")
@@ -48,7 +47,7 @@ class EventUseCases:
             raise EventNotFoundError(f"Event with slug {slug} not found")
         return EventResponseDTO.from_entity(event)
     
-    async def update_event(self, event_id: UUID, event_data: UpdateEventDTO) -> EventResponseDTO:
+    async def update_event(self, event_id: str, event_data: UpdateEventDTO) -> EventResponseDTO:
         event = await self.event_repository.get_by_id(event_id)
         if not event:
             raise EventNotFoundError(f"Event with id {event_id} not found")
@@ -74,7 +73,7 @@ class EventUseCases:
         updated_event = await self.event_repository.update(event)
         return EventResponseDTO.from_entity(updated_event)
     
-    async def delete_event(self, event_id: UUID) -> bool:
+    async def delete_event(self, event_id: str) -> bool:
         event = await self.event_repository.get_by_id(event_id)
         if not event:
             raise EventNotFoundError(f"Event with id {event_id} not found")

@@ -1,5 +1,4 @@
 from typing import Optional, List
-from uuid import UUID
 from datetime import datetime
 from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
@@ -7,6 +6,7 @@ from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserRespo
 from app.infrastructure.database.prisma_client import with_prisma
 from app.shared.exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError
 from passlib.context import CryptContext
+from cuid2 import cuid_wrapper
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,8 +24,9 @@ class UserUseCases:
         hashed_password = pwd_context.hash(user_data.password)
         
         # Crear entidad de usuario
+        generate_id = cuid_wrapper()
         user = User(
-            id=UUID.uuid4(),
+            id=generate_id(),
             firstname=user_data.firstname,
             lastname=user_data.lastname,
             email=user_data.email,
@@ -41,7 +42,7 @@ class UserUseCases:
         created_user = await self.user_repository.create(user)
         return UserResponseDTO.from_entity(created_user)
     
-    async def get_user_by_id(self, user_id: UUID) -> Optional[UserResponseDTO]:
+    async def get_user_by_id(self, user_id: str) -> Optional[UserResponseDTO]:
         user = await self.user_repository.get_by_id(user_id)
         if not user:
             raise UserNotFoundError(f"User with id {user_id} not found")
@@ -54,7 +55,7 @@ class UserUseCases:
             raise UserNotFoundError(f"User with email {email} not found")
         return UserResponseDTO.from_entity(user)
     
-    async def update_user(self, user_id: UUID, user_data: UpdateUserDTO) -> UserResponseDTO:
+    async def update_user(self, user_id: str, user_data: UpdateUserDTO) -> UserResponseDTO:
         user = await self.user_repository.get_by_id(user_id)
         if not user:
             raise UserNotFoundError(f"User with id {user_id} not found")
@@ -76,7 +77,7 @@ class UserUseCases:
         updated_user = await self.user_repository.update(user)
         return UserResponseDTO.from_entity(updated_user)
     
-    async def delete_user(self, user_id: UUID) -> bool:
+    async def delete_user(self, user_id: str) -> bool:
         user = await self.user_repository.get_by_id(user_id)
         if not user:
             raise UserNotFoundError(f"User with id {user_id} not found")

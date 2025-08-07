@@ -24,8 +24,6 @@ async def create_user(
             detail=str(e)
         )
 
-
-# Endpoint de login
 @router.post("/login")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),

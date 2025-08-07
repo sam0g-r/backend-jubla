@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 from enum import Enum
 
 class PaymentStatus(str, Enum):
@@ -17,9 +16,9 @@ class PastoralLetterStatus(str, Enum):
 
 @dataclass
 class Registration:
-    id: UUID
-    user_id: UUID
-    event_id: UUID
+    id: str
+    user_id: str
+    event_id: str
     payment_status: PaymentStatus
     pastoral_letter_status: PastoralLetterStatus
     paypal_order_id: Optional[str] = None

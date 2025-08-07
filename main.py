@@ -30,7 +30,7 @@ app.add_middleware(
 )
 
 # Middleware de autenticación
-app.add_middleware(AuthMiddleware)
+# app.add_middleware(AuthMiddleware)
 
 # Rutas
 app.include_router(user_routes.router, prefix="/api/v1")

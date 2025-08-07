@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from uuid import UUID
 from app.domain.entities.event import Event
 
 class EventRepository(ABC):
@@ -9,7 +8,7 @@ class EventRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_by_id(self, event_id: UUID) -> Optional[Event]:
+    async def get_by_id(self, event_id: str) -> Optional[Event]:
         pass
     
     @abstractmethod
@@ -21,7 +20,7 @@ class EventRepository(ABC):
         pass
     
     @abstractmethod
-    async def delete(self, event_id: UUID) -> bool:
+    async def delete(self, event_id: str) -> bool:
         pass
     
     @abstractmethod

@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 class CreateUserDTO(BaseModel):
     firstname: str
@@ -21,7 +20,7 @@ class UpdateUserDTO(BaseModel):
     state: Optional[str] = None
 
 class UserResponseDTO(BaseModel):
-    id: UUID
+    id: str
     firstname: str
     lastname: str
     email: str

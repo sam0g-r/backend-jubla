@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from uuid import UUID
 from app.application.use_cases.event_use_cases import EventUseCases
 from app.application.dto.event_dto import CreateEventDTO, UpdateEventDTO, EventResponseDTO
 from app.presentation.dependencies import get_event_use_cases
@@ -47,7 +46,7 @@ async def create_event(
 
 @router.put("/{event_id}", response_model=EventResponseDTO)
 async def update_event(
-    event_id: UUID,
+    event_id: str,
     event_data: UpdateEventDTO,
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
@@ -62,7 +61,7 @@ async def update_event(
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event(
-    event_id: UUID,
+    event_id: str,
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
