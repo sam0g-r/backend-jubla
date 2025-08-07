@@ -38,7 +38,7 @@ async def login(
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "name": user.name,
+                "name": user.full_name,
             }
         }
     except InvalidCredentialsError:

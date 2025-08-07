@@ -182,5 +182,5 @@ pip install -r requirements.txt
 
 - Se usan **UUIDs como IDs** primarios
 - Las relaciones usan `onDelete: Cascade`
-- Los campos `created_at` y `updated_at` se actualizan automáticamente
+- Los campos `createdAt` y `updatedAt` se actualizan automáticamente
 - Los enums están definidos directamente en el esquema `.prisma`

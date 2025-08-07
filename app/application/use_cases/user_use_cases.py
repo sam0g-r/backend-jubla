@@ -30,22 +30,24 @@ class UserUseCases:
             firstname=user_data.firstname,
             lastname=user_data.lastname,
             email=user_data.email,
+            password=hashed_password,
             birthdate=user_data.birthdate,
             phone=user_data.phone,
-            country=user_data.country,
-            state=user_data.state,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            countryId=user_data.countryId,
+            stateId=user_data.stateId,
+            church=user_data.church,
+            createdAt=datetime.utcnow(),
+            updatedAt=datetime.utcnow()
         )
         
         # Guardar en repositorio
         created_user = await self.user_repository.create(user)
         return UserResponseDTO.from_entity(created_user)
     
-    async def get_user_by_id(self, user_id: str) -> Optional[UserResponseDTO]:
-        user = await self.user_repository.get_by_id(user_id)
+    async def get_user_by_id(self, userId: str) -> Optional[UserResponseDTO]:
+        user = await self.user_repository.get_by_id(userId)
         if not user:
-            raise UserNotFoundError(f"User with id {user_id} not found")
+            raise UserNotFoundError(f"User with id {userId} not found")
         return UserResponseDTO.from_entity(user)
     
     @with_prisma
@@ -55,10 +57,10 @@ class UserUseCases:
             raise UserNotFoundError(f"User with email {email} not found")
         return UserResponseDTO.from_entity(user)
     
-    async def update_user(self, user_id: str, user_data: UpdateUserDTO) -> UserResponseDTO:
-        user = await self.user_repository.get_by_id(user_id)
+    async def update_user(self, userId: str, user_data: UpdateUserDTO) -> UserResponseDTO:
+        user = await self.user_repository.get_by_id(userId)
         if not user:
-            raise UserNotFoundError(f"User with id {user_id} not found")
+            raise UserNotFoundError(f"User with id {userId} not found")
         
         # Actualizar campos
         if user_data.firstname is not None:
@@ -67,22 +69,22 @@ class UserUseCases:
             user.lastname = user_data.lastname
         if user_data.phone is not None:
             user.phone = user_data.phone
-        if user_data.country is not None:
-            user.country = user_data.country
-        if user_data.state is not None:
-            user.state = user_data.state
+        if user_data.countryId is not None:
+            user.countryId = user_data.countryId
+        if user_data.stateId is not None:
+            user.stateId = user_data.stateId
         
-        user.updated_at = datetime.utcnow()
+        user.updatedAt = datetime.utcnow()
         
         updated_user = await self.user_repository.update(user)
         return UserResponseDTO.from_entity(updated_user)
     
-    async def delete_user(self, user_id: str) -> bool:
-        user = await self.user_repository.get_by_id(user_id)
+    async def delete_user(self, userId: str) -> bool:
+        user = await self.user_repository.get_by_id(userId)
         if not user:
-            raise UserNotFoundError(f"User with id {user_id} not found")
+            raise UserNotFoundError(f"User with id {userId} not found")
         
-        return await self.user_repository.delete(user_id)
+        return await self.user_repository.delete(userId)
     
     async def list_users(self, skip: int = 0, limit: int = 100) -> List[UserResponseDTO]:
         users = await self.user_repository.list_all(skip=skip, limit=limit)
@@ -96,6 +98,6 @@ class UserUseCases:
     
     async def authenticate_user(self, email: str, password: str):
         user = await self.user_repository.get_by_email(email)
-        if not user or not await self.verify_password(password, user.hashed_password):
+        if not user or not await self.verify_password(password, user.password):
             raise InvalidCredentialsError("Invalid credentials")
         return user

@@ -8,7 +8,7 @@ class EventRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_by_id(self, event_id: str) -> Optional[Event]:
+    async def get_by_id(self, eventId: str) -> Optional[Event]:
         pass
     
     @abstractmethod
@@ -20,7 +20,7 @@ class EventRepository(ABC):
         pass
     
     @abstractmethod
-    async def delete(self, event_id: str) -> bool:
+    async def delete(self, eventId: str) -> bool:
         pass
     
     @abstractmethod

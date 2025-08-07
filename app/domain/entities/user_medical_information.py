@@ -6,6 +6,7 @@ from typing import Optional
 @dataclass
 class UserMedicalInformation:
     id: str
+<<<<<<< Updated upstream
     user_id: str
     has_patologies: bool = False
     has_medication: bool = False
@@ -25,3 +26,24 @@ class UserMedicalInformation:
     emergency_contact_email: str
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None
+=======
+    userId: str
+    hasPatologies: bool = False
+    hasMedication: bool = False
+    hasAllergies: bool = False
+    hasMedicationAllergies: bool = False
+    hasSurgeryHistory: bool = False
+    hasDaietaryRestrictions: bool = False
+    patologies: Optional[str] = None
+    medication: Optional[str] = None
+    allergies: Optional[str] = None
+    medicationAllergies: Optional[str] = None
+    surgeryHistory: Optional[str] = None
+    dietaryRestrictions: Optional[str] = None
+    emergencyContactName: str
+    emergencyContactPhone: str
+    emergencyContactRelationship: str
+    emergencyContactEmail: str
+    createdAt: datetime = field(default_factory=datetime.now)
+    updatedAt: Optional[datetime] = None
+>>>>>>> Stashed changes

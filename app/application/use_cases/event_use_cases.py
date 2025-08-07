@@ -22,23 +22,23 @@ class EventUseCases:
             title=event_data.title,
             slug=event_data.slug,
             description=event_data.description,
-            start_date=event_data.start_date,
-            end_date=event_data.end_date,
+            startDate=event_data.startDate,
+            endDate=event_data.endDate,
             max_participants=event_data.max_participants,
             current_participants=0,
             price=event_data.price,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            createdAt=datetime.utcnow(),
+            updatedAt=datetime.utcnow()
         )
         
         # Guardar en repositorio
         created_event = await self.event_repository.create(event)
         return EventResponseDTO.from_entity(created_event)
     
-    async def get_by_id(self, event_id: str) -> Optional[EventResponseDTO]:
-        event = await self.event_repository.get_by_id(event_id)
+    async def get_by_id(self, eventId: str) -> Optional[EventResponseDTO]:
+        event = await self.event_repository.get_by_id(eventId)
         if not event:
-            raise EventNotFoundError(f"Event with id {event_id} not found")
+            raise EventNotFoundError(f"Event with id {eventId} not found")
         return EventResponseDTO.from_entity(event)
     
     async def get_by_slug(self, slug: str) -> Optional[EventResponseDTO]:
@@ -47,38 +47,38 @@ class EventUseCases:
             raise EventNotFoundError(f"Event with slug {slug} not found")
         return EventResponseDTO.from_entity(event)
     
-    async def update_event(self, event_id: str, event_data: UpdateEventDTO) -> EventResponseDTO:
-        event = await self.event_repository.get_by_id(event_id)
+    async def update_event(self, eventId: str, event_data: UpdateEventDTO) -> EventResponseDTO:
+        event = await self.event_repository.get_by_id(eventId)
         if not event:
-            raise EventNotFoundError(f"Event with id {event_id} not found")
+            raise EventNotFoundError(f"Event with id {eventId} not found")
         
         # Actualizar campos
         if event_data.title is not None:
             event.title = event_data.title
         if event_data.description is not None:
             event.description = event_data.description
-        if event_data.start_date is not None:
-            event.start_date = event_data.start_date
-        if event_data.end_date is not None:
-            event.end_date = event_data.end_date
+        if event_data.startDate is not None:
+            event.startDate = event_data.startDate
+        if event_data.endDate is not None:
+            event.endDate = event_data.endDate
         if event_data.max_participants is not None:
             event.max_participants = event_data.max_participants
         if event_data.price is not None:
             event.price = event_data.price
-        if event_data.is_active is not None:
-            event.is_active = event_data.is_active
+        if event_data.isActive is not None:
+            event.isActive = event_data.isActive
         
-        event.updated_at = datetime.utcnow()
+        event.updatedAt = datetime.utcnow()
         
         updated_event = await self.event_repository.update(event)
         return EventResponseDTO.from_entity(updated_event)
     
-    async def delete_event(self, event_id: str) -> bool:
-        event = await self.event_repository.get_by_id(event_id)
+    async def delete_event(self, eventId: str) -> bool:
+        event = await self.event_repository.get_by_id(eventId)
         if not event:
-            raise EventNotFoundError(f"Event with id {event_id} not found")
+            raise EventNotFoundError(f"Event with id {eventId} not found")
         
-        return await self.event_repository.delete(event_id)
+        return await self.event_repository.delete(eventId)
     
     async def list_active_events(self, skip: int = 0, limit: int = 100) -> List[EventResponseDTO]:
         events = await self.event_repository.list_active(skip=skip, limit=limit)
