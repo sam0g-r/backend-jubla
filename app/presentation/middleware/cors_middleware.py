@@ -5,6 +5,7 @@ import re
 from app.shared.config.settings import settings
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+from supertokens_python import get_all_cors_headers
 
 class CORSMiddleware(BaseHTTPMiddleware):
     def __init__(
@@ -18,16 +19,16 @@ class CORSMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.allowed_origins = allowed_origins or settings.ALLOWED_ORIGINS
         self.allowed_methods = allowed_methods or ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-        self.allowed_headers = allowed_headers or ["*"]
+        self.allowed_headers = ["content-type"] + get_all_cors_headers()
         self.max_age = max_age
 
     async def dispatch(self, request: Request, call_next):
         origin = request.headers.get("origin")
-        
+
         # Manejar preflight requests
         if request.method == "OPTIONS":
             return self._handle_preflight_request(origin)
-        
+
         # Verificar origen para requests normales
         if origin and not self._is_origin_allowed(origin):
             print(f"Origin recibido: {origin}")
@@ -73,4 +74,4 @@ class CORSMiddleware(BaseHTTPMiddleware):
                 return True
             if re.match(allowed_origin, origin):
                 return True
-        return False 
+        return False

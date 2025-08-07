@@ -1,7 +1,9 @@
+from app.supertokens import init_supertokens
+init_supertokens()
+from supertokens_python.framework.fastapi import get_middleware, get_exception_handler
 from app.infrastructure.database.prisma_client import prisma_client
 from fastapi import FastAPI
 from app.presentation.middleware.cors_middleware import CORSMiddleware as CustomCORSMiddleware
-from app.presentation.middleware.auth_middleware import AuthMiddleware
 from app.presentation.api import auth_routes, user_routes, event_routes
 from app.shared.config.settings import settings
 
@@ -12,6 +14,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+app.add_middleware(get_middleware())
+app.add_exception_handler(Exception, get_exception_handler())
 
 @app.on_event("startup")
 async def startup():
@@ -28,9 +33,6 @@ app.add_middleware(
     allowed_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowed_headers=["*"]
 )
-
-# Middleware de autenticación
-# app.add_middleware(AuthMiddleware)
 
 # Rutas
 app.include_router(user_routes.router, prefix="/api/v1")
@@ -52,8 +54,8 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        app, 
-        host="0.0.0.0", 
+        app,
+        host="0.0.0.0",
         port=8000,
         reload=settings.DEBUG
-    ) 
+    )
