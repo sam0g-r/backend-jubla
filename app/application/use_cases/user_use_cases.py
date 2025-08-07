@@ -4,7 +4,8 @@ from datetime import datetime
 from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
 from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserResponseDTO
-from app.shared.exceptions.user_exceptions import UserAlreadyExistsError, UserNotFoundError
+from app.infrastructure.database.prisma_client import with_prisma
+from app.shared.exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -46,6 +47,7 @@ class UserUseCases:
             raise UserNotFoundError(f"User with id {user_id} not found")
         return UserResponseDTO.from_entity(user)
     
+    @with_prisma
     async def get_user_by_email(self, email: str) -> Optional[UserResponseDTO]:
         user = await self.user_repository.get_by_email(email)
         if not user:
@@ -90,3 +92,9 @@ class UserUseCases:
     
     async def get_password_hash(self, password: str) -> str:
         return pwd_context.hash(password) 
+    
+    async def authenticate_user(self, email: str, password: str):
+        user = await self.user_repository.get_by_email(email)
+        if not user or not await self.verify_password(password, user.hashed_password):
+            raise InvalidCredentialsError("Invalid credentials")
+        return user

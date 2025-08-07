@@ -34,13 +34,13 @@ class PrismaClient:
         await self.disconnect()
 
 # Instancia global del cliente
-prisma_client = Prisma()
+prisma_client = PrismaClient()
 
 def with_prisma(func):
     """Decorador para manejar la conexión de Prisma automáticamente"""
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        async with prisma_client as client:
+        async with prisma_client:
             return await func(*args, **kwargs)
     return wrapper
 

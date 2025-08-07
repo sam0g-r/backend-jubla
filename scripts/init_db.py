@@ -19,10 +19,6 @@ async def init_database():
         await prisma_client.connect()
         print("✅ Conexión exitosa a PostgreSQL")
 
-        # Simula una query para probar conexión real
-        users = await prisma_client.client.user.find_many()
-        print(f"👥 Usuarios encontrados: {len(users)}")
-
     except Exception as e:
         print(f"❌ Error conectando a la base de datos: {e}")
 

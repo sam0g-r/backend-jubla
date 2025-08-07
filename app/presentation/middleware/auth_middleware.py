@@ -11,6 +11,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         public_paths = [
             "/api/v1/auth/login", 
+            "/api/v1/auth/register", 
             "/api/v1/events",
             "/api/v1/events/{slug}"
             "/health",

@@ -13,3 +13,7 @@ class UserAlreadyExistsError(UserException):
 class UserValidationError(UserException):
     """Raised when user data validation fails"""
     pass 
+
+class InvalidCredentialsError(Exception):
+    """Excepción lanzada cuando las credenciales del usuario no son válidas."""
+    pass

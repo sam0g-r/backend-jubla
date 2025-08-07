@@ -6,21 +6,8 @@ from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserRespo
 from app.presentation.dependencies import get_user_use_cases
 from app.shared.exceptions.user_exceptions import UserAlreadyExistsError, UserNotFoundError
 
-router = APIRouter(prefix="/users", tags=["users"])
 
-@router.post("/", response_model=UserResponseDTO, status_code=status.HTTP_201_CREATED)
-async def create_user(
-    user_data: CreateUserDTO,
-    user_use_cases: UserUseCases = Depends(get_user_use_cases)
-):
-    try:
-        user = await user_use_cases.create_user(user_data)
-        return user
-    except UserAlreadyExistsError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(e)
-        )
+router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/{user_id}", response_model=UserResponseDTO)
 async def get_user(
