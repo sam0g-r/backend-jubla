@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.application.use_cases.user_use_cases import UserUseCases
@@ -60,7 +59,6 @@ async def delete_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         ) 
-=======
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.application.use_cases.user_use_cases import UserUseCases
@@ -69,7 +67,6 @@ from app.presentation.dependencies import get_user_use_cases
 from app.shared.exceptions.user_exceptions import UserAlreadyExistsError, UserNotFoundError
 from supertokens_python.recipe.session.framework.fastapi import verify_session
 from supertokens_python.recipe.session import SessionContainer
-
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -143,4 +140,3 @@ async def delete_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
->>>>>>> Stashed changes

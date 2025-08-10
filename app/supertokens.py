@@ -2,6 +2,7 @@ from supertokens_python import init, InputAppInfo, SupertokensConfig
 from supertokens_python.recipe import session, emailpassword
 from app.shared.config.settings import settings
 
+
 def init_supertokens():
     init(
         app_info=InputAppInfo(
