@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:6.0
+    ports:
+      - "3567:3567"
+    environment:
+      - SUPERTOKENS_POSTGRESQL_HOST=db
+      - SUPERTOKENS_POSTGRESQL_PORT=5432
+      - SUPERTOKENS_POSTGRESQL_USER=user
+      - SUPERTOKENS_POSTGRESQL_PASSWORD=pass
+      - SUPERTOKENS_POSTGRESQL_DATABASE=jubla_db
+    depends_on:
+      - db
+    restart: unless-stopped
+
   api:
     build: .
     ports:
@@ -12,6 +26,7 @@ services:
     depends_on:
       - db
       - redis
+      - supertokens
     volumes:
       - .:/app
     restart: unless-stopped
@@ -35,4 +50,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data: 
+  postgres_data:
