@@ -33,7 +33,7 @@ class EventRepositoryImpl(EventRepository):
     async def create(self, event: Event) -> Event:
         """Crear un nuevo evento en la base de datos"""
         async with prisma_client as client:
-            db_event = await client.event.create(
+            db_event = await client.client.event.create(
                 data={
                     "organizationId": event.organizationId,
                     "title": event.title,
@@ -55,7 +55,7 @@ class EventRepositoryImpl(EventRepository):
     async def get_by_id(self, eventId: str) -> Optional[Event]:
         """Obtener evento por ID"""
         async with prisma_client as client:
-            db_event = await client.event.find_unique(where={"id": eventId})
+            db_event = await client.client.event.find_unique(where={"id": eventId})
             if db_event:
                 return self._to_entity(db_event)
             return None
@@ -63,7 +63,7 @@ class EventRepositoryImpl(EventRepository):
     async def get_by_slug(self, slug: str) -> Optional[Event]:
         """Obtener evento por slug"""
         async with prisma_client as client:
-            db_event = await client.event.find_unique(where={"slug": slug})
+            db_event = await client.client.event.find_unique(where={"slug": slug})
             if db_event:
                 return self._to_entity(db_event)
             return None
@@ -71,7 +71,7 @@ class EventRepositoryImpl(EventRepository):
     async def update(self, event: Event) -> Event:
         """Actualizar evento"""
         async with prisma_client as client:
-            db_event = await client.event.update(
+            db_event = await client.client.event.update(
                 where={"id": event.id},
                 data={
                     "title": event.title,
@@ -95,7 +95,7 @@ class EventRepositoryImpl(EventRepository):
         """Eliminar evento"""
         async with prisma_client as client:
             try:
-                await client.event.delete(where={"id": eventId})
+                await client.client.event.delete(where={"id": eventId})
                 return True
             except Exception:
                 return False
@@ -103,7 +103,7 @@ class EventRepositoryImpl(EventRepository):
     async def list_active(self, skip: int = 0, limit: int = 100) -> List[Event]:
         """Listar eventos activos con paginación"""
         async with prisma_client as client:
-            db_events = await client.event.find_many(
+            db_events = await client.client.event.find_many(
                 where={"isActive": True},
                 skip=skip,
                 take=limit,
@@ -114,7 +114,7 @@ class EventRepositoryImpl(EventRepository):
     async def list_upcoming(self, skip: int = 0, limit: int = 100) -> List[Event]:
         """Listar eventos próximos con paginación"""
         async with prisma_client as client:
-            db_events = await client.event.find_many(
+            db_events = await client.client.event.find_many(
                 where={"startDate": {"gt": datetime.now()}},
                 skip=skip,
                 take=limit,
@@ -125,5 +125,5 @@ class EventRepositoryImpl(EventRepository):
     async def exists_by_slug(self, slug: str) -> bool:
         """Verificar si existe un evento con el slug dado"""
         async with prisma_client as client:
-            event = await client.event.find_unique(where={"slug": slug})
+            event = await client.client.event.find_unique(where={"slug": slug})
             return event is not None

@@ -4,6 +4,9 @@ from app.application.use_cases.event_use_cases import EventUseCases
 from app.application.dto.event_dto import CreateEventDTO, UpdateEventDTO, EventResponseDTO
 from app.presentation.dependencies import get_event_use_cases
 from app.shared.exceptions.event_exceptions import EventNotFoundError, EventAlreadyExistsError
+from supertokens_python.recipe.session.framework.fastapi import verify_session
+from supertokens_python.recipe.session import SessionContainer
+
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -33,6 +36,7 @@ async def get_event_by_slug(
 @router.post("/", response_model=EventResponseDTO, status_code=status.HTTP_201_CREATED)
 async def create_event(
     event_data: CreateEventDTO,
+    session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
@@ -48,6 +52,7 @@ async def create_event(
 async def update_event(
     event_id: str,
     event_data: UpdateEventDTO,
+    session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
@@ -62,6 +67,7 @@ async def update_event(
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event(
     event_id: str,
+    session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
