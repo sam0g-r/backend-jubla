@@ -10,7 +10,7 @@ from supertokens_python.recipe.session import SessionContainer
 
 router = APIRouter(prefix="/events", tags=["events"])
 
-@router.get("/", response_model=List[EventResponseDTO])
+@router.get("/get", response_model=List[EventResponseDTO])
 async def get_events(
     skip: int = 0,
     limit: int = 100,
@@ -33,7 +33,7 @@ async def get_event_by_slug(
             detail=str(e)
         )
 
-@router.post("/", response_model=EventResponseDTO, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=EventResponseDTO, status_code=status.HTTP_201_CREATED)
 async def create_event(
     event_data: CreateEventDTO,
     session: SessionContainer = Depends(verify_session()),
@@ -48,7 +48,7 @@ async def create_event(
             detail=str(e)
         )
 
-@router.put("/{event_id}", response_model=EventResponseDTO)
+@router.put("/update/{event_id}", response_model=EventResponseDTO)
 async def update_event(
     event_id: str,
     event_data: UpdateEventDTO,
@@ -64,7 +64,7 @@ async def update_event(
             detail=str(e)
         )
 
-@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event(
     event_id: str,
     session: SessionContainer = Depends(verify_session()),
