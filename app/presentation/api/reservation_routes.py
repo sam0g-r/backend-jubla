@@ -48,7 +48,7 @@ async def list_reservations(
 
 
 @router.patch("/update/{reservation_id}", response_model=Reservation)
-async def update_reservation(
+async def update(
     reservation_id: str,
     updates: Dict,
     session: SessionContainer = Depends(verify_session()),

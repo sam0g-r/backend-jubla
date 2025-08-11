@@ -6,4 +6,4 @@ class UpdateReservationUseCase:
         self.reservation_repository = reservation_repository
 
     async def execute(self, reservation_id: str, updates: dict) -> Reservation:
-        return await self.reservation_repository.update_reservation(reservation_id, updates)
+        return await self.reservation_repository.update(reservation_id, updates)

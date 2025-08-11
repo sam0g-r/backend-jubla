@@ -41,7 +41,7 @@ class ReservationRepositoryImpl(ReservationRepository):
             )
         return self._to_entity(db_reservation)
 
-    async def query_reservations(self, filters: dict = None, skip: int = 0, limit: int = 10):
+    async def query(self, filters: dict = None, skip: int = 0, limit: int = 10):
         filters = filters or {}
         prisma_filters = {}
         # Map filters to prisma query
@@ -58,7 +58,7 @@ class ReservationRepositoryImpl(ReservationRepository):
             )
         return [self._to_entity(r) for r in db_reservations], total
 
-    async def update_reservation(self, reservation_id: str, updates: dict) -> Reservation:
+    async def update(self, reservation_id: str, updates: dict) -> Reservation:
         allowed_fields = [
             "pastoralLetterUploaded",
             "pastoralLetterUploadedAt",

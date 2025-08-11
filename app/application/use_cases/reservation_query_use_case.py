@@ -7,4 +7,4 @@ class QueryReservationsUseCase:
         self.reservation_repository = reservation_repository
 
     def execute(self, filters: Optional[Dict[str, Any]] = None, skip: int = 0, limit: int = 10) -> Tuple[List[Reservation], int]:
-        return self.reservation_repository.query_reservations(filters, skip, limit)
+        return self.reservation_repository.query(filters, skip, limit)

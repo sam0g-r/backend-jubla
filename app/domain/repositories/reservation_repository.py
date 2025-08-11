@@ -9,11 +9,11 @@ class ReservationRepository(ABC):
         pass
 
     @abstractmethod
-    async def query_reservations(self, filters: Optional[dict] = None, skip: int = 0, limit: int = 10):
+    async def query(self, filters: Optional[dict] = None, skip: int = 0, limit: int = 10):
         """Query reservations with filters and pagination."""
         pass
 
     @abstractmethod
-    async def update_reservation(self, reservation_id: str, updates: dict) -> Reservation:
+    async def update(self, reservation_id: str, updates: dict) -> Reservation:
         """Actualiza solo los campos permitidos de una reserva."""
         pass

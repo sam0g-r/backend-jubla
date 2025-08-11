@@ -7,6 +7,10 @@ from typing import Optional
 class UserMedicalInformation:
     id: str
     userId: str
+    emergencyContactName: str
+    emergencyContactPhone: str
+    emergencyContactRelationship: str
+    emergencyContactEmail: str
     hasPatologies: bool = False
     hasMedication: bool = False
     hasAllergies: bool = False
@@ -19,9 +23,5 @@ class UserMedicalInformation:
     medicationAllergies: Optional[str] = None
     surgeryHistory: Optional[str] = None
     dietaryRestrictions: Optional[str] = None
-    emergencyContactName: str
-    emergencyContactPhone: str
-    emergencyContactRelationship: str
-    emergencyContactEmail: str
     createdAt: datetime = field(default_factory=datetime.now)
     updatedAt: Optional[datetime] = None
