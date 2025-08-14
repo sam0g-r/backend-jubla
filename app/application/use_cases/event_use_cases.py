@@ -4,6 +4,7 @@ from app.domain.entities.event import Event
 from app.domain.repositories.event_repository import EventRepository
 from app.application.dto.event_dto import CreateEventDTO, UpdateEventDTO, EventResponseDTO
 from app.shared.exceptions.event_exceptions import EventNotFoundError, EventAlreadyExistsError
+from cuid2 import cuid_wrapper
 
 class EventUseCases:
     def __init__(self, event_repository: EventRepository):
@@ -27,8 +28,8 @@ class EventUseCases:
             max_participants=event_data.max_participants,
             current_participants=0,
             price=event_data.price,
-            createdAt=datetime.utcnow(),
-            updatedAt=datetime.utcnow()
+            createdAt=datetime.now(),
+            updatedAt=datetime.now()
         )
         
         # Guardar en repositorio
@@ -68,7 +69,7 @@ class EventUseCases:
         if event_data.isActive is not None:
             event.isActive = event_data.isActive
         
-        event.updatedAt = datetime.utcnow()
+        event.updatedAt = datetime.now()
         
         updated_event = await self.event_repository.update(event)
         return EventResponseDTO.from_entity(updated_event)

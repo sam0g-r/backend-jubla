@@ -24,4 +24,4 @@ class UserMedicalInformation:
     surgeryHistory: Optional[str] = None
     dietaryRestrictions: Optional[str] = None
     createdAt: datetime = field(default_factory=datetime.now)
-    updatedAt: Optional[datetime] = None
+    updatedAt: datetime = field(default_factory=datetime.now)

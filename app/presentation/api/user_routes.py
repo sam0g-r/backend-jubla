@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.application.use_cases.user_use_cases import UserUseCases
-from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserResponseDTO
+from app.application.dto.user_dto import UserResponseDTO
+from app.application.odm.user_odm import UpdateUserODM
 from app.presentation.dependencies import get_user_use_cases
-from app.shared.exceptions.user_exceptions import UserAlreadyExistsError, UserNotFoundError
+from app.shared.exceptions.user_exceptions import UserNotFoundError
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from supertokens_python.recipe.session.framework.fastapi import verify_session
@@ -55,12 +56,12 @@ async def list_users(
 @router.put("/update/{user_id}", response_model=UserResponseDTO)
 async def update_user(
     user_id: str,
-    user_data: UpdateUserDTO,
+    user_data: UpdateUserODM,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
     session: SessionContainer = Depends(verify_session())
 ):
     try:
-        user = await user_use_cases.update_user(user_id, user_data)
+        user = await user_use_cases.update_user(user_id, user_data.dict())
         return user
     except UserNotFoundError as e:
         raise HTTPException(

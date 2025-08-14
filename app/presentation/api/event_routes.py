@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.application.use_cases.event_use_cases import EventUseCases
-from app.application.dto.event_dto import CreateEventDTO, UpdateEventDTO, EventResponseDTO
+from app.application.dto.event_dto import EventResponseDTO
+from app.application.odm.event_odm import CreaetEventODM, UpdateEventODM
 from app.presentation.dependencies import get_event_use_cases
 from app.shared.exceptions.event_exceptions import EventNotFoundError, EventAlreadyExistsError
 from supertokens_python.recipe.session.framework.fastapi import verify_session
@@ -35,12 +36,12 @@ async def get_event_by_slug(
 
 @router.post("/create", response_model=EventResponseDTO, status_code=status.HTTP_201_CREATED)
 async def create_event(
-    event_data: CreateEventDTO,
+    event_data: CreaetEventODM,
     session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
-        event = await event_use_cases.create_event(event_data)
+        event = await event_use_cases.create_event(event_data.dict())
         return event
     except EventAlreadyExistsError as e:
         raise HTTPException(
@@ -51,12 +52,12 @@ async def create_event(
 @router.put("/update/{event_id}", response_model=EventResponseDTO)
 async def update_event(
     event_id: str,
-    event_data: UpdateEventDTO,
+    event_data: UpdateEventODM,
     session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
-        event = await event_use_cases.update_event(event_id, event_data)
+        event = await event_use_cases.update_event(event_id, event_data.dict())
         return event
     except EventNotFoundError as e:
         raise HTTPException(

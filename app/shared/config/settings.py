@@ -12,29 +12,33 @@ class Settings(BaseSettings):
     ]
     
     # Database
-    DATABASE_URL: str = "postgresql://user:pass@localhost:5556/jubla_db"
+    DATABASE_URL: str
     
     # JWT
-    SECRET_KEY: str = "your-secret-key-change-in-production"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
     
     # PayPal
-    PAYPAL_CLIENT_ID: str = ""
-    PAYPAL_CLIENT_SECRET: str = ""
-    PAYPAL_MODE: str = "sandbox"  # or "live"
+    PAYPAL_CLIENT_ID: str
+    PAYPAL_CLIENT_SECRET: str
+    PAYPAL_MODE: str
     
     # Redis
-    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_URL: str
     
     # API Configuration
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "Jubla API"
     PROJECT_VERSION: str = "1.0.0"
+
+    # Google configuration
+    GOOGLE_DRIVE_FOLDER_ID: str
+    GOOGLE_SERVICE_ACCOUNT: str
     
     # Environment
-    ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    ENVIRONMENT: str
+    DEBUG: bool
 
     class Config:
         env_file = ".env"

@@ -1,22 +1,11 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
-from enum import Enum
+from typing import List, Optional
 
-class ReservationStatus(str, Enum):
-    PENDING_PAYMENT = "PENDING_PAYMENT"
-    PENDING_PASTORAL_LETTER = "PENDING_PASTORAL_LETTER"
-    PENDING_BOTH = "PENDING_BOTH"
-    COMPLETED = "COMPLETED"
-    CANCELLED = "CANCELLED"
-    EXPIRED = "EXPIRED"
+from app.enums import PaymentStatusEnum, ReservationStatusEnum
+from app.domain.entities.financial_movement import FinancialMovement
+from app.domain.entities.reservation_payment import ReservationPayment
 
-class PaymentStatus(str, Enum):
-    PENDING = "PENDING"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-    REFUNDED = "REFUNDED"
-    PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED"
 
 @dataclass
 class Reservation:
@@ -29,7 +18,9 @@ class Reservation:
     pastoralLetterUploaded: bool = False
     pastoralLetterUploadedAt: Optional[datetime] = None
     paymentCompletedAt: Optional[datetime] = None
-    paymentStatus: PaymentStatus = PaymentStatus.PENDING
-    status: ReservationStatus = ReservationStatus.PENDING_BOTH
+    paymentStatus: PaymentStatusEnum = PaymentStatusEnum.PENDING
+    status: ReservationStatusEnum = ReservationStatusEnum.PENDING_BOTH
     createdAt: datetime = field(default_factory=datetime.now)
-    updatedAt: Optional[datetime] = None
+    updatedAt: datetime = field(default_factory=datetime.now)
+    financialMovement: Optional[List[FinancialMovement]] = field(default_factory=list)
+    payments: Optional[List[ReservationPayment]] = field(default_factory=list)

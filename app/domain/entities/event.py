@@ -21,7 +21,7 @@ class Event:
     paymentDeadline: Optional[datetime] = None
     price: float = 0.0
     createdAt: datetime = field(default_factory=datetime.now)
-    updatedAt: Optional[datetime] = None
+    updatedAt: datetime = field(default_factory=datetime.now)
 
     @property
     def is_upcoming(self) -> bool:

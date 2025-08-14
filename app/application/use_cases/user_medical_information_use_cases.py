@@ -1,3 +1,4 @@
+from app.application.dto.user_medical_info_dto import UserMedicalInformationDTO
 from app.domain.entities.user_medical_information import UserMedicalInformation
 from app.domain.repositories.user_medical_information_repository import UserMedicalInformationRepository
 from typing import Dict, Any, List, Optional, Tuple
@@ -8,7 +9,7 @@ class CreateUserMedicalInformationUseCase:
     def __init__(self, repo: UserMedicalInformationRepository):
         self.repo = repo
 
-    async def execute(self, data: Dict[str, Any]) -> UserMedicalInformation:
+    async def execute(self, data: Dict[str, Any]) -> UserMedicalInformationDTO:
         info = UserMedicalInformation(
             id=str(uuid4()),
             userId=data["userId"],
@@ -29,13 +30,15 @@ class CreateUserMedicalInformationUseCase:
             emergencyContactRelationship=data["emergencyContactRelationship"],
             emergencyContactEmail=data["emergencyContactEmail"],
             createdAt=datetime.now(),
-            updatedAt=None
+            updatedAt=datetime.now()
         )
-        return await self.repo.create(info)
+        user_medical_info = await self.repo.create(info)
+        return UserMedicalInformationDTO.from_entity(user_medical_info)
 
 class QueryUserMedicalInformationUseCase:
     def __init__(self, repo: UserMedicalInformationRepository):
         self.repo = repo
 
-    async def execute(self, filters: Optional[Dict] = None, skip: int = 0, limit: int = 10) -> Tuple[List[UserMedicalInformation], int]:
-        return await self.repo.query(filters, skip, limit)
+    async def execute(self, filters: Optional[Dict] = None, skip: int = 0, limit: int = 10) -> Tuple[List[UserMedicalInformationDTO], int]:
+        user_medical_info = await self.repo.query(filters, skip, limit)
+        return UserMedicalInformationDTO.from_entity(user_medical_info)

@@ -17,3 +17,8 @@ class ReservationRepository(ABC):
     async def update(self, reservation_id: str, updates: dict) -> Reservation:
         """Actualiza solo los campos permitidos de una reserva."""
         pass
+
+    @abstractmethod
+    async def count_by_event(self, eventId) -> int:
+        """Centa el total de registros activos de reserva."""
+        pass

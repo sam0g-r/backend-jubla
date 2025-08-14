@@ -1,5 +1,6 @@
 from app.domain.entities.reservation import Reservation
 from app.domain.repositories.reservation_repository import ReservationRepository
+from app.enums.reservation_status_enum import ReservationStatusEnum
 from app.infrastructure.database.prisma_client import prisma_client
 
 class ReservationRepositoryImpl(ReservationRepository):
@@ -22,23 +23,26 @@ class ReservationRepositoryImpl(ReservationRepository):
 
     async def create(self, reservation: Reservation) -> Reservation:
         async with prisma_client as client:
-            db_reservation = await client.client.reservations.create(
-                data = {
-                    "id": reservation.id,
-                    "userId": reservation.userId,
-                    "eventId": reservation.eventId,
-                    "termsAccepted": reservation.termsAccepted,
-                    "imageRightsAccepted": reservation.imageRightsAccepted,
-                    "reservationDate": reservation.reservationDate,
-                    "pastoralLetterUploaded": reservation.pastoralLetterUploaded,
-                    "pastoralLetterUploadedAt": reservation.pastoralLetterUploadedAt,
-                    "paymentCompletedAt": reservation.paymentCompletedAt,
-                    "paymentStatus": reservation.paymentStatus.value,
-                    "status": reservation.status.value,
-                    "createdAt": reservation.createdAt,
-                    "updatedAt": reservation.updatedAt,
+            prisma_data = {
+                "id": reservation.id,
+                "termsAccepted": reservation.termsAccepted,
+                "imageRightsAccepted": reservation.imageRightsAccepted,
+                "reservationDate": reservation.reservationDate,
+                "pastoralLetterUploaded": reservation.pastoralLetterUploaded,
+                "pastoralLetterUploadedAt": reservation.pastoralLetterUploadedAt,
+                "paymentCompletedAt": reservation.paymentCompletedAt,
+                "paymentStatus": reservation.paymentStatus.value,
+                "status": reservation.status.value,
+                "createdAt": reservation.createdAt,
+                "updatedAt": reservation.updatedAt,
+                "user": {
+                    "connect": {"id": reservation.userId}
+                },
+                "event": {
+                    "connect": {"id": reservation.eventId}
                 }
-            )
+            }
+            db_reservation = await client.client.reservations.create(data=prisma_data)
         return self._to_entity(db_reservation)
 
     async def query(self, filters: dict = None, skip: int = 0, limit: int = 10):
@@ -78,3 +82,15 @@ class ReservationRepositoryImpl(ReservationRepository):
                 data=data
             )
         return self._to_entity(db_reservation)
+    
+    async def count_by_event(self, eventId) -> int:
+        async with prisma_client as client:
+            return await client.client.reservations.count(
+                where={
+                    'event_id': eventId,
+                    'status': {
+                        'not': ReservationStatusEnum.CANCELLED.value
+                    }
+                }
+                )
+        

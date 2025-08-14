@@ -33,23 +33,7 @@ class EventRepositoryImpl(EventRepository):
     async def create(self, event: Event) -> Event:
         """Crear un nuevo evento en la base de datos"""
         async with prisma_client as client:
-            db_event = await client.client.event.create(
-                data={
-                    "organizationId": event.organizationId,
-                    "title": event.title,
-                    "slug": event.slug,
-                    "description": event.description,
-                    "startDate": event.startDate,
-                    "endDate": event.endDate,
-                    "countryId": event.countryId,
-                    "stateId": event.stateId,
-                    "currency": event.currency,
-                    "maxCapacity": event.maxCapacity,
-                    "pastoralLetterDeadline": event.pastoralLetterDeadline,
-                    "paymentDeadline": event.paymentDeadline,
-                    "price": event.price,
-                }
-            )
+            db_event = await client.client.event.create(data=event.__dict__)
             return self._to_entity(db_event)
 
     async def get_by_id(self, eventId: str) -> Optional[Event]:

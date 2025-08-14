@@ -36,8 +36,8 @@ class UserUseCases:
             countryId=user_data.countryId,
             stateId=user_data.stateId,
             church=user_data.church,
-            createdAt=datetime.utcnow(),
-            updatedAt=datetime.utcnow()
+            createdAt=datetime.now(),
+            updatedAt=datetime.now()
         )
         
         # Guardar en repositorio
@@ -74,7 +74,7 @@ class UserUseCases:
         if user_data.stateId is not None:
             user.stateId = user_data.stateId
         
-        user.updatedAt = datetime.utcnow()
+        user.updatedAt = datetime.now()
         
         updated_user = await self.user_repository.update(user)
         return UserResponseDTO.from_entity(updated_user)
