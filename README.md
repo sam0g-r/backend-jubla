@@ -19,51 +19,59 @@ app/
 
 - **Python 3.12**
 - **FastAPI** - Framework web
-- **SQLAlchemy** - ORM
+- **Prisma (client para Python)** - ORM/cliente para PostgreSQL
 - **PostgreSQL** - Base de datos
 - **Redis** - Cache y sesiones
-- **JWT** - Autenticación
 - **Docker** - Containerización
 
 ## 📋 Requisitos
 
 - Python 3.12+
-- Docker y Docker Compose
-- PostgreSQL
-- Redis
+- Docker y Docker Compose (para correr el sistema completo)
 
-## 🛠️ Instalación
+## 🛠️ Quick start (Docker)
 
-### 1. Clonar el repositorio
+1. Copia y edita el `.env` con credenciales reales:
+
+    ```bash
+    cp env.example .env
+    # Editar .env y colocar DATABASE_URL, SECRET_KEY, etc.
+    ```
+
+2. Construir y levantar todos los servicios:
+
+    ```bash
+    docker compose up --build
+    ```
+
+3. Accede a la API en http://localhost:8000
+
+Para levantar solo la base de datos y redis (útil en desarrollo local):
+
 ```bash
-git clone <repository-url>
-cd backend-jubla
+docker compose up db redis -d
 ```
 
-### 2. Configurar variables de entorno
-```bash
-cp env.example .env
-# Editar .env con tus configuraciones
-```
+Y luego ejecutar la app localmente (hot reload):
 
-### 3. Instalar dependencias
 ```bash
-pip install -r requirements.txt
-```
-
-### 4. Ejecutar con Docker (recomendado)
-```bash
-docker-compose up --build
-```
-
-### 5. Ejecutar localmente
-```bash
-# Iniciar PostgreSQL y Redis
-docker-compose up db redis -d
-
-# Ejecutar la aplicación
 uvicorn main:app --reload
 ```
+
+## 🧭 Prisma (generar cliente para Python)
+
+Este repositorio usa Prisma para definir el esquema y generar un cliente de Python.
+
+Pasos rápidos (desde la raíz del repositorio):
+
+```bash
+# Asegúrate de tener DATABASE_URL en .env apuntando a la BD correcta
+pip install -r requirements.txt
+npx prisma py fetch
+npx prisma generate
+```
+
+Si necesitas más detalles sobre Prisma (puedes usar Docker si no tienes Node instalado), revisa `PRISMA_SETUP.md`.
 
 ## 📚 API Documentation
 
@@ -72,61 +80,6 @@ Una vez ejecutada la aplicación, puedes acceder a:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 - **OpenAPI JSON**: http://localhost:8000/openapi.json
-
-## 🔐 Autenticación
-
-La API usa JWT para autenticación. Los endpoints protegidos requieren el header:
-
-```
-Authorization: Bearer <token>
-```
-
-## 🌐 Endpoints Principales
-
-### Usuarios
-- `POST /api/v1/users/` - Crear usuario
-- `GET /api/v1/users/{user_id}` - Obtener usuario
-- `PUT /api/v1/users/{user_id}` - Actualizar usuario
-- `DELETE /api/v1/users/{user_id}` - Eliminar usuario
-- `GET /api/v1/users/` - Listar usuarios
-
-### Eventos
-- `GET /api/v1/events/` - Listar eventos activos
-- `GET /api/v1/events/{slug}` - Obtener evento por slug
-- `POST /api/v1/events/` - Crear evento
-- `PUT /api/v1/events/{event_id}` - Actualizar evento
-- `DELETE /api/v1/events/{event_id}` - Eliminar evento
-
-## 🧪 Testing
-
-```bash
-# Ejecutar tests
-pytest
-
-# Con coverage
-pytest --cov=app
-
-# Tests específicos
-pytest tests/test_users.py
-```
-
-## 📦 Estructura del Proyecto
-
-```
-backend-jubla/
-├── app/
-│   ├── domain/              # Entidades y reglas de negocio
-│   ├── application/         # Casos de uso
-│   ├── infrastructure/      # Implementaciones de repositorios
-│   ├── presentation/        # API REST
-│   └── shared/             # Configuración y utilidades
-├── tests/                  # Tests unitarios e integración
-├── alembic/               # Migraciones de BD
-├── requirements.txt        # Dependencias Python
-├── Dockerfile             # Configuración Docker
-├── docker-compose.yml     # Orquestación de servicios
-└── main.py               # Punto de entrada
-```
 
 ## 🔧 Desarrollo
 
@@ -150,15 +103,26 @@ alembic revision --autogenerate -m "description"
 alembic upgrade head
 ```
 
+## 🧪 Testing
+
+```bash
+# Ejecutar tests
+pytest
+
+# Con coverage
+pytest --cov=app
+```
+
 ## 🚀 Despliegue
 
-### Producción
+### Producción (mínimo)
+
 ```bash
 # Construir imagen
 docker build -t jubla-backend .
 
 # Ejecutar
-docker run -p 8000:8000 jubla-backend
+docker run -p 8000:8000 --env-file .env jubla-backend
 ```
 
 ### Variables de entorno de producción
@@ -169,4 +133,4 @@ docker run -p 8000:8000 jubla-backend
 
 ## 📝 Licencia
 
-Este proyecto está bajo la licencia MIT. 
+Este proyecto está bajo la licencia MIT.
