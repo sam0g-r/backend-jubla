@@ -24,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 RUN apt-get update && apt-get install -y npm && rm -rf /var/lib/apt/lists/*
 
 # Instala el CLI de Prisma globalmente (opcional, pero útil)
-RUN npm install -g prisma
+RUN npm install -g prisma --force
 
 # Copiar código de la aplicación
 COPY . .
