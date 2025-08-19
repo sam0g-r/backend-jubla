@@ -43,5 +43,6 @@ USER appuser
 
 EXPOSE 8000
 
-sh -c "npx prisma generate && npx prisma migrate deploy && uvicorn main:app --host 0.0.0.0 --port 8080"
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && uvicorn main:app --host 0.0.0.0 --port 8000"]
+
 
