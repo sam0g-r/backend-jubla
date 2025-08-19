@@ -23,11 +23,17 @@ RUN pip install --no-cache-dir -r requirements.txt \
 # Instala Node.js y npm (necesario para Prisma)
 RUN apt-get update && apt-get install -y npm && rm -rf /var/lib/apt/lists/*
 
-# Instala el CLI de Prisma globalmente (opcional, pero útil)
-RUN npm install -g prisma --force
+#Copia los package
+COPY package*.json ./
+
+# Instala el CLI
+RUN npm install
 
 # Copiar código de la aplicación
 COPY . .
+
+# Generate models
+RUN npx prisma generate
 
 # Crear usuario no-root y ajustar permisos
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
@@ -37,4 +43,5 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+sh -c "npx prisma generate && npx prisma migrate deploy && uvicorn main:app --host 0.0.0.0 --port 8080"
+
