@@ -32,8 +32,12 @@ RUN npm install
 # Copiar código de la aplicación
 COPY . .
 
+# Limitar paralelismo
+ENV PRISMA_CLI_QUERY_ENGINE_BINARY_TARGETS=debian-openssl-3.0.x
+ENV PRISMA_CLI_ENGINE_TYPE=binary
+
 # Generate models
-RUN npx prisma@5.11.0 generate
+RUN npx prisma@5.11.0 generate --no-engine
 
 # Crear usuario no-root y ajustar permisos
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
