@@ -33,7 +33,7 @@ RUN npm install
 COPY . .
 
 # Generate models
-RUN npx prisma generate
+RUN npx prisma@5.11.0 generate
 
 # Crear usuario no-root y ajustar permisos
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
@@ -43,6 +43,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && uvicorn main:app --host 0.0.0.0 --port 8000"]
-
-
+CMD ["sh", "-c", "npx prisma@5.11.0 generate && npx prisma@5.11.0 migrate deploy && uvicorn main:app --host 0.0.0.0 --port 8000"]
