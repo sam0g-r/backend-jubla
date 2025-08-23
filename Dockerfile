@@ -33,9 +33,9 @@ RUN mkdir -p /root/.cache/prisma-python \
 RUN python -m prisma generate
 
 # Crear usuario no root por seguridad
-RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
-    && chown -R appuser:appuser /app
-USER appuser
+#RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
+    #&& chown -R appuser:appuser /app
+USER root
 
 EXPOSE 8000
 
