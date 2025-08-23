@@ -26,7 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Crear directorio de cache accesible para Prisma
-RUN mkdir -p /app/.cache
+RUN mkdir -p /root/.cache/prisma-python \
+    && chmod -R 777 /root/.cache/prisma-python
 
 # Generar el cliente Prisma en Python
 RUN python -m prisma generate
