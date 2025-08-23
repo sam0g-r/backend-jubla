@@ -15,10 +15,7 @@ COPY prisma ./prisma/
 
 # Generate the Prisma client. This is the memory-intensive step.
 # The output path is now explicitly configured in schema.prisma.
-RUN npx prisma generate
-
-# Como root, aplica migraciones
-RUN python -m prisma migrate deploy
+# RUN npx prisma generate
 
 # ---- Final Stage ----
 # This is the final, lean production image.
@@ -43,6 +40,9 @@ RUN python -m pip install --upgrade pip
 # Install Python dependencies from requirements.txt
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Como root, aplica migraciones
+RUN python -m prisma migrate deploy
 
 # Copy the application code
 COPY . .
