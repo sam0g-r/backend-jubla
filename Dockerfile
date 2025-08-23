@@ -17,6 +17,9 @@ COPY prisma ./prisma/
 # The output path is now explicitly configured in schema.prisma.
 RUN npx prisma generate
 
+# Como root, aplica migraciones
+RUN python -m prisma migrate deploy
+
 # ---- Final Stage ----
 # This is the final, lean production image.
 FROM python:3.12-slim
@@ -60,4 +63,4 @@ EXPOSE 8000
 # We first apply any pending database migrations and then start the uvicorn server.
 # We use `python -m prisma` which is available from the `prisma-client-py` package.
 # This avoids needing Node.js in the final image.
-CMD ["sh", "-c", "python -m prisma migrate deploy && uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]
