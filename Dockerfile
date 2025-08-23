@@ -5,6 +5,9 @@ ENV PYTHONUNBUFFERED=1
 # Asegura que prisma-client-py descargue el binario correcto en Debian slim
 ENV PRISMA_CLI_QUERY_ENGINE_BINARY_TARGETS=debian-openssl-3.0.x
 
+# Configurar el cache de Prisma en un directorio accesible
+ENV PRISMA_CLIENT_ENGINE_BINARY_CACHE_DIR=/app/.cache
+
 WORKDIR /app
 
 # Instalar dependencias del sistema necesarias
@@ -21,6 +24,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar todo el código de la aplicación (incluye schema.prisma)
 COPY . .
+
+# Crear directorio de cache accesible para Prisma
+RUN mkdir -p /app/.cache
 
 # Generar el cliente Prisma en Python
 RUN python -m prisma generate
