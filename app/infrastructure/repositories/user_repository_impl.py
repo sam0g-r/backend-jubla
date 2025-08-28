@@ -1,5 +1,4 @@
 from typing import List, Optional
-from datetime import datetime
 from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
 from app.infrastructure.database.prisma_client import prisma_client
@@ -30,21 +29,20 @@ class UserRepositoryImpl(UserRepository):
 
     async def create(self, user: User) -> User:
         """Crear un nuevo usuario en la base de datos"""
-        async with prisma_client as client:
-            db_user = await client.client.user.create(
-                data={
-                    "email": user.email,
-                    "firstname": user.firstname,
-                    "lastname": user.lastname,
-                    "birthdate": user.birthdate,
-                    "countryId": user.countryId,
-                    "stateId": user.stateId,
-                    "phone": user.phone,
-                    "password": user.password,
-                    "church": user.church,
-                }
-            )
-            return self._to_entity(db_user)
+        db_user = await prisma_client.client.user.create(
+            data={
+                "email": user.email,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "birthdate": user.birthdate,
+                "countryId": user.countryId,
+                "stateId": user.stateId,
+                "phone": user.phone,
+                "password": user.password,
+                "church": user.church,
+            }
+        )
+        return self._to_entity(db_user)
 
     async def get_by_id(self, userId: str) -> Optional[User]:
         """Obtener usuario por ID"""

@@ -2,16 +2,14 @@ from app.application.dto.reservation_dto import ReservationDTO, ReservationQuery
 from app.application.use_cases.reservation_query_use_case import QueryReservationsUseCase
 from app.domain.entities import user
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.encoders import jsonable_encoder
 import logging
 from datetime import datetime, date
 from app.application.use_cases.reservation_use_cases import CreateReservationUseCase
 from app.infrastructure.repositories.reservation_repository_impl import ReservationRepositoryImpl
 from app.application.use_cases.reservation_update_use_case import UpdateReservationUseCase
-from app.domain.entities.reservation import Reservation
 from supertokens_python.recipe.session.framework.fastapi import verify_session
 from supertokens_python.recipe.session import SessionContainer
-from typing import List, Optional, Any
+from typing import Optional, Any
 from app.application.odm.reservation_odm import CreateReservationODM, UpdateReservationODM
 
 # NUEVO: imports para full reserva
@@ -20,6 +18,8 @@ from app.infrastructure.repositories.user_medical_information_repository_impl im
 from app.infrastructure.repositories.event_repository_impl import EventRepositoryImpl
 from app.application.use_cases.reservation_full_use_case import CreateFullReservationUseCase
 from app.application.odm.reservation_odm import CreateFullReservationODM
+from app.infrastructure.repositories.file_repository_impl import FileRepositoryImpl
+from app.presentation.decorators.auth import require_roles
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +42,15 @@ def _normalize_dates(obj: Any):
 # NUEVO ENDPOINT: flujo completo de reserva
 @router.post("/full-create", response_model=ReservationDTO, status_code=status.HTTP_201_CREATED)
 async def create_full_reservation(
-    reservation_data: CreateFullReservationODM
+    reservation_data: CreateFullReservationODM,
+    #_=Depends(require_roles('Participant')),
 ):
     user_repo = UserRepositoryImpl()
     medical_repo = UserMedicalInformationRepositoryImpl()
     event_repo = EventRepositoryImpl()
     reservation_repo = ReservationRepositoryImpl()
-    use_case = CreateFullReservationUseCase(user_repo, medical_repo, event_repo, reservation_repo)
+    file_repo = FileRepositoryImpl()
+    use_case = CreateFullReservationUseCase(user_repo, medical_repo, event_repo, reservation_repo, file_repo=file_repo)
     try:
         reservation = await use_case.execute(reservation_data.dict())
         # Convertir explícitamente a DTO para aplicar las normalizaciones (fechas -> datetime)

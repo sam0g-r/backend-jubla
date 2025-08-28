@@ -15,7 +15,6 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me", response_model=UserResponseDTO)
 async def get_current_user(
-    session: SessionContainer = Depends(verify_session()),
     user_use_cases: UserUseCases = Depends(get_user_use_cases)
 ):
     try:
