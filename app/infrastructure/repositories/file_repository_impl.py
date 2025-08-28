@@ -19,18 +19,19 @@ class FileRepositoryImpl(FileRepository):
         )
 
     async def create(self, file: File) -> File:
-        async with prisma_client as client:
-            db_file = await client.client.file.create(data=file.__dict__)
+        db_file = await prisma_client.client.file.create(data=file.__dict__)
         return self._to_entity(db_file)
 
     async def get_by_id(self, file_id: str) -> Optional[File]:
-        async with prisma_client as client:
-            db_file = await client.client.file.find_unique(where={"id": file_id})
-            if db_file:
-                return self._to_entity(db_file)
-            return None
+        db_file = await prisma_client.client.file.find_unique(where={"id": file_id})
+        if db_file:
+            return self._to_entity(db_file)
+        return None
 
-    async def list_by_user(self, user_id: str) -> List[File]:
-        async with prisma_client as client:
-            db_files = await client.client.file.find_many(where={"uploadedById": user_id})
+    async def list_by_user(self, userId: str) -> List[File]:
+        db_files = await prisma_client.client.file.find_many(where={"uploadedById": userId})
         return [self._to_entity(f) for f in db_files]
+
+    async def update(self, file_id: str, updates: dict) -> File:
+        db_file = await prisma_client.client.file.update(where={'id': file_id}, data=updates)
+        return self._to_entity(db_file)

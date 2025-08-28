@@ -12,5 +12,9 @@ class FileRepository(ABC):
         pass
 
     @abstractmethod
-    async def list_by_user(self, user_id: str) -> List[File]:
+    async def list_by_user(self, userId: str) -> List[File]:
+        pass
+
+    @abstractmethod
+    async def update(self, file_id: str, updates: dict) -> File:
         pass

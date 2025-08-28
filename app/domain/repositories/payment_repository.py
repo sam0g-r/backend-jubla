@@ -16,5 +16,5 @@ class PaymentRepository(ABC):
         pass
 
     @abstractmethod
-    async def list_by_user(self, user_id: str) -> List[Payment]:
+    async def list_by_user(self, userId: str) -> List[Payment]:
         pass

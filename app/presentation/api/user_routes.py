@@ -19,8 +19,8 @@ async def get_current_user(
     user_use_cases: UserUseCases = Depends(get_user_use_cases)
 ):
     try:
-        user_id = session.get_user_id()
-        user = await user_use_cases.get_user_by_id(user_id)
+        userId = session.get_userId()
+        user = await user_use_cases.get_user_by_id(userId)
         return user
     except UserNotFoundError as e:
         raise HTTPException(
@@ -28,14 +28,14 @@ async def get_current_user(
             detail=str(e)
         )
 
-@router.get("/get/{user_id}", response_model=UserResponseDTO)
+@router.get("/get/{userId}", response_model=UserResponseDTO)
 async def get_user(
-    user_id: str,
+    userId: str,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
     session: SessionContainer = Depends(verify_session())
 ):
     try:
-        user = await user_use_cases.get_user_by_id(user_id)
+        user = await user_use_cases.get_user_by_id(userId)
         return user
     except UserNotFoundError as e:
         raise HTTPException(
@@ -53,15 +53,15 @@ async def list_users(
     users = await user_use_cases.list_users(skip=skip, limit=limit)
     return users
 
-@router.put("/update/{user_id}", response_model=UserResponseDTO)
+@router.put("/update/{userId}", response_model=UserResponseDTO)
 async def update_user(
-    user_id: str,
+    userId: str,
     user_data: UpdateUserODM,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
     session: SessionContainer = Depends(verify_session())
 ):
     try:
-        user = await user_use_cases.update_user(user_id, user_data.dict())
+        user = await user_use_cases.update_user(userId, user_data.dict())
         return user
     except UserNotFoundError as e:
         raise HTTPException(
@@ -69,14 +69,14 @@ async def update_user(
             detail=str(e)
         )
 
-@router.delete("/delete/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{userId}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    user_id: str,
+    userId: str,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
     session: SessionContainer = Depends(verify_session())
 ):
     try:
-        await user_use_cases.delete_user(user_id)
+        await user_use_cases.delete_user(userId)
         return None
     except UserNotFoundError as e:
         raise HTTPException(

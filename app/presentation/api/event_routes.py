@@ -41,7 +41,7 @@ async def create_event(
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
-        event = await event_use_cases.create_event(event_data.dict())
+        event = await event_use_cases.create_event(event_data)
         return event
     except EventAlreadyExistsError as e:
         raise HTTPException(
@@ -49,15 +49,15 @@ async def create_event(
             detail=str(e)
         )
 
-@router.put("/update/{event_id}", response_model=EventResponseDTO)
+@router.put("/update/{eventId}", response_model=EventResponseDTO)
 async def update_event(
-    event_id: str,
+    eventId: str,
     event_data: UpdateEventODM,
     session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
-        event = await event_use_cases.update_event(event_id, event_data.dict())
+        event = await event_use_cases.update_event(eventId, event_data)
         return event
     except EventNotFoundError as e:
         raise HTTPException(
@@ -65,14 +65,14 @@ async def update_event(
             detail=str(e)
         )
 
-@router.delete("/delete/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{eventId}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event(
-    event_id: str,
+    eventId: str,
     session: SessionContainer = Depends(verify_session()),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
-        await event_use_cases.delete_event(event_id)
+        await event_use_cases.delete_event(eventId)
         return None
     except EventNotFoundError as e:
         raise HTTPException(

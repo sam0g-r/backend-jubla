@@ -29,13 +29,11 @@ class UserMedicalInformationRepositoryImpl(UserMedicalInformationRepository):
         )
 
     async def create(self, info: UserMedicalInformation) -> UserMedicalInformation:
-        async with prisma_client as client:
-            db_info = await client.client.usermedicalinformation.create(data=info.__dict__)
+        db_info = await prisma_client.client.usermedicalinformation.create(data=info.__dict__)
         return self._to_entity(db_info)
 
     async def query(self, filters: Optional[Dict] = None, skip: int = 0, limit: int = 10):
         filters = filters or {}
-        async with prisma_client as client:
-            total = await client.client.usermedicalinformation.count(where=filters)
-            db_infos = await client.client.usermedicalinformation.find_many(where=filters, skip=skip, take=limit, order={"createdAt": "desc"})
+        total = await prisma_client.client.usermedicalinformation.count(where=filters)
+        db_infos = await prisma_client.client.usermedicalinformation.find_many(where=filters, skip=skip, take=limit, order={"createdAt": "desc"})
         return [self._to_entity(i) for i in db_infos], total

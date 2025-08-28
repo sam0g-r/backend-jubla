@@ -32,82 +32,74 @@ class EventRepositoryImpl(EventRepository):
 
     async def create(self, event: Event) -> Event:
         """Crear un nuevo evento en la base de datos"""
-        async with prisma_client as client:
-            db_event = await client.client.event.create(data=event.__dict__)
-            return self._to_entity(db_event)
+        db_event = await prisma_client.client.event.create(data=event.__dict__)
+        return self._to_entity(db_event)
 
     async def get_by_id(self, eventId: str) -> Optional[Event]:
         """Obtener evento por ID"""
-        async with prisma_client as client:
-            db_event = await client.client.event.find_unique(where={"id": eventId})
-            if db_event:
-                return self._to_entity(db_event)
-            return None
+        db_event = await prisma_client.client.event.find_unique(where={"id": eventId})
+        if db_event:
+            return self._to_entity(db_event)
+        return None
 
     async def get_by_slug(self, slug: str) -> Optional[Event]:
         """Obtener evento por slug"""
-        async with prisma_client as client:
-            db_event = await client.client.event.find_unique(where={"slug": slug})
-            if db_event:
-                return self._to_entity(db_event)
-            return None
+        db_event = await prisma_client.client.event.find_unique(where={"slug": slug})
+        if db_event:
+            return self._to_entity(db_event)
+        return None
 
     async def update(self, event: Event) -> Event:
         """Actualizar evento"""
-        async with prisma_client as client:
-            db_event = await client.client.event.update(
-                where={"id": event.id},
-                data={
-                    "title": event.title,
-                    "slug": event.slug,
-                    "description": event.description,
-                    "startDate": event.startDate,
-                    "endDate": event.endDate,
-                    "countryId": event.countryId,
-                    "stateId": event.stateId,
-                    "currency": event.currency,
-                    "isActive": event.isActive,
-                    "maxCapacity": event.maxCapacity,
-                    "pastoralLetterDeadline": event.pastoralLetterDeadline,
-                    "paymentDeadline": event.paymentDeadline,
-                    "price": event.price,
-                },
-            )
-            return self._to_entity(db_event)
+        db_event = await prisma_client.client.event.update(
+            where={"id": event.id},
+            data={
+                "title": event.title,
+                "slug": event.slug,
+                "description": event.description,
+                "startDate": event.startDate,
+                "endDate": event.endDate,
+                "countryId": event.countryId,
+                "stateId": event.stateId,
+                "currency": event.currency,
+                "isActive": event.isActive,
+                "maxCapacity": event.maxCapacity,
+                "pastoralLetterDeadline": event.pastoralLetterDeadline,
+                "paymentDeadline": event.paymentDeadline,
+                "price": event.price,
+            },
+        )
+        return self._to_entity(db_event)
 
     async def delete(self, eventId: str) -> bool:
         """Eliminar evento"""
-        async with prisma_client as client:
-            try:
-                await client.client.event.delete(where={"id": eventId})
-                return True
-            except Exception:
-                return False
+        try:
+            await prisma_client.client.event.delete(where={"id": eventId})
+            return True
+        except Exception:
+            return False
 
     async def list_active(self, skip: int = 0, limit: int = 100) -> List[Event]:
         """Listar eventos activos con paginación"""
-        async with prisma_client as client:
-            db_events = await client.client.event.find_many(
-                where={"isActive": True},
-                skip=skip,
-                take=limit,
-                order=[{"startDate": "asc"}],
-            )
-            return [self._to_entity(db_event) for db_event in db_events]
+        db_events = await prisma_client.client.event.find_many(
+            where={"isActive": True},
+            skip=skip,
+            take=limit,
+            order=[{"startDate": "asc"}],
+        )
+        return [self._to_entity(db_event) for db_event in db_events]
 
     async def list_upcoming(self, skip: int = 0, limit: int = 100) -> List[Event]:
         """Listar eventos próximos con paginación"""
-        async with prisma_client as client:
-            db_events = await client.client.event.find_many(
-                where={"startDate": {"gt": datetime.now()}},
-                skip=skip,
-                take=limit,
-                order=[{"startDate": "asc"}],
-            )
-            return [self._to_entity(db_event) for db_event in db_events]
+        db_events = await prisma_client.client.event.find_many(
+            where={"startDate": {"gt": datetime.now()}},
+            skip=skip,
+            take=limit,
+            order=[{"startDate": "asc"}],
+        )
+        return [self._to_entity(db_event) for db_event in db_events]
 
     async def exists_by_slug(self, slug: str) -> bool:
         """Verificar si existe un evento con el slug dado"""
-        async with prisma_client as client:
-            event = await client.client.event.find_unique(where={"slug": slug})
-            return event is not None
+        event = await prisma_client.client.event.find_unique(where={"slug": slug})
+        return event is not None

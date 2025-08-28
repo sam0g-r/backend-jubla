@@ -104,16 +104,16 @@ async def list_reservations(
     return ReservationQueryDTO(reservations=results, total=total)
 
 
-@router.patch("/update/{reservation_id}", response_model=ReservationDTO)
+@router.patch("/update/{reservationId}", response_model=ReservationDTO)
 async def update(
-    reservation_id: str,
+    reservationId: str,
     updates: UpdateReservationODM,
     #session: SessionContainer = Depends(verify_session()),
 ):
     repo = ReservationRepositoryImpl()
     use_case = UpdateReservationUseCase(repo)
     try:
-        updated = await use_case.execute(reservation_id, updates.dict())
+        updated = await use_case.execute(reservationId, updates.dict())
         return updated
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -25,11 +25,13 @@ class EventUseCases:
             description=event_data.description,
             startDate=event_data.startDate,
             endDate=event_data.endDate,
-            max_participants=event_data.max_participants,
-            current_participants=0,
+            maxCapacity=event_data.maxCapacity,
             price=event_data.price,
             createdAt=datetime.now(),
-            updatedAt=datetime.now()
+            updatedAt=datetime.now(),
+            organizationId=event_data.organizationId,
+            countryId=event_data.countryId,
+            stateId=event_data.stateId,
         )
         
         # Guardar en repositorio
@@ -62,8 +64,8 @@ class EventUseCases:
             event.startDate = event_data.startDate
         if event_data.endDate is not None:
             event.endDate = event_data.endDate
-        if event_data.max_participants is not None:
-            event.max_participants = event_data.max_participants
+        if event_data.maxCapacity is not None:
+            event.maxCapacity = event_data.maxCapacity
         if event_data.price is not None:
             event.price = event_data.price
         if event_data.isActive is not None:
