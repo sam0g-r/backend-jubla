@@ -7,6 +7,11 @@ class CreateUserDTO(BaseModel):
     lastname: str
     email: EmailStr
     birthdate: datetime
+    gender: Optional[str] = None
+    documentId: Optional[str] = None
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
+    birthCountry: str
     phone: str
     countryId: str
     stateId: str
@@ -20,6 +25,11 @@ class UpdateUserDTO(BaseModel):
     countryId: Optional[str] = None
     stateId: Optional[str] = None
     church: Optional[str] = None
+    gender: Optional[str] = None
+    documentId: Optional[str] = None
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
+    birthCountry: Optional[str] = None
 
 class UserResponseDTO(BaseModel):
     id: str
@@ -27,6 +37,8 @@ class UserResponseDTO(BaseModel):
     lastname: str
     email: str
     birthdate: datetime
+    gender: Optional[str] = None
+    documentId: Optional[str] = None
     phone: str
     countryId: str
     stateId: str
@@ -47,6 +59,8 @@ class UserResponseDTO(BaseModel):
             lastname=user.lastname,
             email=user.email,
             birthdate=user.birthdate,
+            gender=getattr(user, 'gender', None),
+            documentId=getattr(user, 'documentId', None),
             phone=user.phone,
             countryId=user.countryId,
             stateId=user.stateId,

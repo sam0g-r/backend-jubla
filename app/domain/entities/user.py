@@ -22,11 +22,16 @@ class User:
     firstname: str
     lastname: str
     birthdate: datetime
+    gender: str
+    documentId: str
     countryId: str
     stateId: str
     church: str
     phone: str
     password: str
+    birthCountry: str
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
     medicalRecord: Optional[UserMedicalInformation] = None
     isActive: bool = True
     isVerified: bool = False

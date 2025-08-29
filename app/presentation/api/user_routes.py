@@ -1,3 +1,4 @@
+from app.presentation.decorators.auth import require_roles
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.application.use_cases.user_use_cases import UserUseCases
@@ -15,7 +16,9 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me", response_model=UserResponseDTO)
 async def get_current_user(
-    user_use_cases: UserUseCases = Depends(get_user_use_cases)
+    user_use_cases: UserUseCases = Depends(get_user_use_cases),
+    _=Depends(require_roles('OnBoarding, Financing, Admin, Participant, ParticipantManager, CoreEngineer')),
+    session: SessionContainer = Depends(verify_session())
 ):
     try:
         userId = session.get_userId()
@@ -31,7 +34,7 @@ async def get_current_user(
 async def get_user(
     userId: str,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
-    session: SessionContainer = Depends(verify_session())
+    _=Depends(require_roles('OnBoarding, Admin, ParticipantManager, CoreEngineer')),
 ):
     try:
         user = await user_use_cases.get_user_by_id(userId)
@@ -47,7 +50,7 @@ async def list_users(
     skip: int = 0,
     limit: int = 100,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
-    session: SessionContainer = Depends(verify_session())
+    _=Depends(require_roles('OnBoarding, Admin, ParticipantManager, CoreEngineer')),
 ):
     users = await user_use_cases.list_users(skip=skip, limit=limit)
     return users
@@ -57,7 +60,7 @@ async def update_user(
     userId: str,
     user_data: UpdateUserODM,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
-    session: SessionContainer = Depends(verify_session())
+    _=Depends(require_roles('Admin, Participant, ParticipantManager, CoreEngineer')),
 ):
     try:
         user = await user_use_cases.update_user(userId, user_data.dict())
@@ -72,7 +75,7 @@ async def update_user(
 async def delete_user(
     userId: str,
     user_use_cases: UserUseCases = Depends(get_user_use_cases),
-    session: SessionContainer = Depends(verify_session())
+    _=Depends(require_roles('ParticipantManager, CoreEngineer')),
 ):
     try:
         await user_use_cases.delete_user(userId)

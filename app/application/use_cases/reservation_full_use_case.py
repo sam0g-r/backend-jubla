@@ -101,11 +101,14 @@ class CreateFullReservationUseCase:
         from app.infrastructure.adapters.drive_adapter import DriveAdapter
 
         payment_data = data.get('paymentData') or {}
-        paypal_order_id = payment_data.get('orderId') or payment_data.get('paypalOrderId')
-        paypal_summary = None
-        if paypal_order_id:
-            paypal_adapter = PaypalAdapter()
-            paypal_summary = await paypal_adapter.get_order_summary(paypal_order_id)
+        if payment_data.get('paymentMethod') == 'paypal':
+            paypal_order_id = payment_data.get('orderId') or payment_data.get('paypalOrderId')
+            paypal_summary = None
+            if paypal_order_id:
+                paypal_adapter = PaypalAdapter()
+                paypal_summary = await paypal_adapter.get_order_summary(paypal_order_id)
+        elif payment_data.get('paymentMethod') == 'transferencia':
+            transfer_receipt = payment_data.get('transferReceipt')
 
         # construir payloads a pasar al repositorio transaccional
         userId = generate_id()
@@ -118,13 +121,16 @@ class CreateFullReservationUseCase:
             'lastname': data['personalData']['lastname'],
             'birthdate': data['personalData']['birthdate'],
             'phone': data['personalData'].get('phone'),
+            'gender': data['personalData'].get('gender'),
+            'documentId': data['personalData'].get('documentId'),
+            'profession': data['personalData'].get('profession'),
+            'instagramProfile': data['personalData'].get('instagramProfile'),
             'password': hashed_password,
             'church': data['churchData']['church'],
+            'birthCountry': data['personalData']['birthCountry'],
+            'country': {'connect': {'id': data['personalData']['countryId']}},
+            'state': {'connect': {'id': data['personalData']['stateId']}}
         }
-        if data['personalData'].get('countryId'):
-            user_create_data['country'] = {'connect': {'id': data['personalData']['countryId']}}
-        if data['personalData'].get('stateId'):
-            user_create_data['state'] = {'connect': {'id': data['personalData']['stateId']}}
 
         med_payload = {
             'id': cuid_wrapper,
@@ -150,6 +156,15 @@ class CreateFullReservationUseCase:
         file_metadata = None
         if pastoral_b64:
             file_name = f"pastoral_letter_{cuid_wrapper}.pdf"
+            file_metadata = {
+                'name': file_name,
+                'mimeType': 'application/pdf',
+                'driveFileId': '',
+                'url': '',
+                'fileableType': 'USER',
+            }
+        if transfer_receipt:
+            file_name = f"transfer_receipt_{cuid_wrapper}.pdf"
             file_metadata = {
                 'name': file_name,
                 'mimeType': 'application/pdf',
@@ -227,9 +242,11 @@ class CreateFullReservationUseCase:
             eventId=reservation_db.eventId,
             termsAccepted=reservation_db.termsAccepted,
             imageRightsAccepted=reservation_db.imageRightsAccepted,
+            privacyAccepted=reservation_db.privacyAccepted,
             reservationDate=to_datetime(reservation_db.reservationDate),
             pastoralLetterUploaded=reservation_db.pastoralLetterUploaded,
             pastoralLetterUploadedAt=to_datetime(reservation_db.pastoralLetterUploadedAt),
+            pastorContact=reservation_db.pastorContact,
             paymentCompletedAt=to_datetime(reservation_db.paymentCompletedAt),
             paymentStatus=reservation_db.paymentStatus,
             status=reservation_db.status,

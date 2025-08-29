@@ -28,6 +28,7 @@ class UserUseCases:
         
         # Crear entidad de usuario
         generate_id = cuid_wrapper()
+
         user = User(
             id=generate_id(),
             firstname=user_data.firstname,
@@ -35,9 +36,14 @@ class UserUseCases:
             email=user_data.email,
             password=hashed_password,
             birthdate=user_data.birthdate,
+            gender=getattr(user_data, 'gender', None),
+            documentId=getattr(user_data, 'documentId', None),
+            profession=getattr(user_data, 'profession', None),
+            instagramProfile=getattr(user_data, 'instagramProfile', None),
             phone=user_data.phone,
             countryId=user_data.countryId,
             stateId=user_data.stateId,
+            birthCountry=user_data.birthCountry,
             church=user_data.church,
             createdAt=datetime.now(),
             updatedAt=datetime.now()

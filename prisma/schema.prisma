@@ -47,10 +47,15 @@ model User {
   firstname          String
   lastname           String
   birthdate          DateTime
+  gender             String
+  documentId         String
+  profession         String?
+  instagramProfile   String?
   countryId          String
   stateId            String
   church             String
   phone              String
+  birthCountry       String
   password           String
   isActive           Boolean                 @default(true)
   isVerified         Boolean                 @default(false)
@@ -223,10 +228,12 @@ model Reservations {
   userId                   String
   termsAccepted            Boolean                @default(false)
   imageRightsAccepted      Boolean                @default(false)
+  privacyAccepted          Boolean                @default(false)
   eventId                  String
   reservationDate          DateTime               @default(now())
   createdAt                DateTime               @default(now())
   updatedAt                DateTime               @updatedAt
+  pastorContact            String
   pastoralLetterUploaded   Boolean                @default(false)
   pastoralLetterUploadedAt DateTime?
   paymentCompletedAt       DateTime?
