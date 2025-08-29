@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 
@@ -13,3 +13,8 @@ class UpdateUserODM(BaseModel):
     stateId: Optional[CuidStr] = None
     church: Optional[str] = None
     birthdate: Optional[date] = None
+    gender: Optional[str] = None
+    documentId: Optional[str] = None
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
+    birthCountry: Optional[CuidStr] = None

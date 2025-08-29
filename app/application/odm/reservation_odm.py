@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import date, datetime
 
@@ -10,13 +10,19 @@ class PersonDataODM(BaseModel):
     firstname: str
     lastname: str
     birthdate: date
+    gender: str
+    documentId: str
     password: str
     confirmPassword: str
+    birthCountry: str
     countryId: CuidStr
     stateId: CuidStr
     terms: bool
     imageTerms: bool
+    privacyAccepted: bool
     phone: Optional[str] = None
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
 
 
 class MedicalDataODM(BaseModel):
@@ -41,13 +47,16 @@ class MedicalDataODM(BaseModel):
 class ChurchDataODM(BaseModel):
     church: str
     pastorName: str
+    pastorContact: str
     ministries: str
     pastoralLetter: Optional[str] = None ## Base64 encoded PDF
 
 
 class PaymentDataODM(BaseModel):
+    paymentMethod: str
     slug: str
     paypalOrderId: Optional[str] = None
+    transferReceipt: Optional[str] = None
 
 
 class CreateFullReservationODM(BaseModel):
@@ -62,6 +71,8 @@ class CreateReservationODM(BaseModel):
     eventId: CuidStr
     termsAccepted: bool = False
     imageRightsAccepted: bool = False
+    privacyAccepted: bool = False
+    pastorContact: Optional[str] = None
     reservationDate: Optional[datetime]
     pastoralLetterUploaded: bool = False
     pastoralLetterUploadedAt: Optional[datetime] = None
@@ -73,6 +84,8 @@ class CreateReservationODM(BaseModel):
 class UpdateReservationODM(BaseModel):
     termsAccepted: Optional[bool] = None
     imageRightsAccepted: Optional[bool] = None
+    privacyAccepted: Optional[bool] = None
+    pastorContact: Optional[str] = None
     pastoralLetterUploaded: Optional[bool] = None
     pastoralLetterUploadedAt: Optional[datetime] = None
     paymentCompletedAt: Optional[datetime] = None

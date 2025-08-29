@@ -2,16 +2,12 @@ from app.application.dto.reservation_dto import ReservationDTO, ReservationQuery
 from app.application.use_cases.reservation_query_use_case import QueryReservationsUseCase
 from app.domain.entities import user
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.encoders import jsonable_encoder
 import logging
 from datetime import datetime, date
 from app.application.use_cases.reservation_use_cases import CreateReservationUseCase
 from app.infrastructure.repositories.reservation_repository_impl import ReservationRepositoryImpl
 from app.application.use_cases.reservation_update_use_case import UpdateReservationUseCase
-from app.domain.entities.reservation import Reservation
-from supertokens_python.recipe.session.framework.fastapi import verify_session
-from supertokens_python.recipe.session import SessionContainer
-from typing import List, Optional, Any
+from typing import Optional, Any
 from app.application.odm.reservation_odm import CreateReservationODM, UpdateReservationODM
 
 # NUEVO: imports para full reserva
@@ -20,6 +16,8 @@ from app.infrastructure.repositories.user_medical_information_repository_impl im
 from app.infrastructure.repositories.event_repository_impl import EventRepositoryImpl
 from app.application.use_cases.reservation_full_use_case import CreateFullReservationUseCase
 from app.application.odm.reservation_odm import CreateFullReservationODM
+from app.infrastructure.repositories.file_repository_impl import FileRepositoryImpl
+from app.presentation.decorators.auth import require_roles
 
 logger = logging.getLogger(__name__)
 
@@ -39,16 +37,18 @@ def _normalize_dates(obj: Any):
     return obj
 
 
-# NUEVO ENDPOINT: flujo completo de reserva
+# flujo completo de reserva
 @router.post("/full-create", response_model=ReservationDTO, status_code=status.HTTP_201_CREATED)
 async def create_full_reservation(
-    reservation_data: CreateFullReservationODM
+    reservation_data: CreateFullReservationODM,
+    _=Depends(require_roles('OnBoarding, Financing, Admin, Participant, ParticipantManager, CoreEngineer')),
 ):
     user_repo = UserRepositoryImpl()
     medical_repo = UserMedicalInformationRepositoryImpl()
     event_repo = EventRepositoryImpl()
     reservation_repo = ReservationRepositoryImpl()
-    use_case = CreateFullReservationUseCase(user_repo, medical_repo, event_repo, reservation_repo)
+    file_repo = FileRepositoryImpl()
+    use_case = CreateFullReservationUseCase(user_repo, medical_repo, event_repo, reservation_repo, file_repo=file_repo)
     try:
         reservation = await use_case.execute(reservation_data.dict())
         # Convertir explícitamente a DTO para aplicar las normalizaciones (fechas -> datetime)
@@ -70,7 +70,7 @@ async def create_full_reservation(
 @router.post("/create", response_model=ReservationDTO, status_code=status.HTTP_201_CREATED)
 def create_reservation(
     reservation_data: CreateReservationODM,
-    session: SessionContainer = Depends(verify_session())
+    _=Depends(require_roles('Admin, ParticipantManager, CoreEngineer')),
 ):
     reservation_repository = ReservationRepositoryImpl()
     use_case = CreateReservationUseCase(reservation_repository)
@@ -86,7 +86,7 @@ def create_reservation(
 async def list_reservations(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1),
-    #session: SessionContainer = Depends(verify_session()),
+    _=Depends(require_roles('OnBoarding, Financing, Admin, Participant, ParticipantManager, CoreEngineer')),
     userId: Optional[str] = None,
     eventId: Optional[str] = None,
     status: Optional[str] = None
@@ -108,7 +108,7 @@ async def list_reservations(
 async def update(
     reservationId: str,
     updates: UpdateReservationODM,
-    #session: SessionContainer = Depends(verify_session()),
+    _=Depends(require_roles('OnBoarding, Financing, Admin, Participant, ParticipantManager, CoreEngineer')),
 ):
     repo = ReservationRepositoryImpl()
     use_case = UpdateReservationUseCase(repo)

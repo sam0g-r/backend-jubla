@@ -4,7 +4,9 @@ from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
 from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserResponseDTO
 from app.infrastructure.database.prisma_client import with_prisma
-from app.shared.exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError
+from app.infrastructure.repositories.country_repository_impl import CountryRepositoryImpl
+from app.infrastructure.repositories.state_repository_impl import StateRepositoryImpl
+from app.shared.exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError, UserValidationError
 from passlib.context import CryptContext
 from cuid2 import cuid_wrapper
 
@@ -18,13 +20,15 @@ class UserUseCases:
         # Verificar si el usuario ya existe
         existing_user = await self.user_repository.get_by_email(user_data.email)
         if existing_user:
-            raise UserAlreadyExistsError(f"User with email {user_data.email} already exists")
+            # Mensaje en español como se solicita
+            raise UserAlreadyExistsError(f"El email {user_data.email} ya está registrado")
         
         # Hash de la contraseña
         hashed_password = pwd_context.hash(user_data.password)
         
         # Crear entidad de usuario
         generate_id = cuid_wrapper()
+
         user = User(
             id=generate_id(),
             firstname=user_data.firstname,
@@ -32,9 +36,14 @@ class UserUseCases:
             email=user_data.email,
             password=hashed_password,
             birthdate=user_data.birthdate,
+            gender=getattr(user_data, 'gender', None),
+            documentId=getattr(user_data, 'documentId', None),
+            profession=getattr(user_data, 'profession', None),
+            instagramProfile=getattr(user_data, 'instagramProfile', None),
             phone=user_data.phone,
             countryId=user_data.countryId,
             stateId=user_data.stateId,
+            birthCountry=user_data.birthCountry,
             church=user_data.church,
             createdAt=datetime.now(),
             updatedAt=datetime.now()
@@ -69,9 +78,19 @@ class UserUseCases:
             user.lastname = user_data.lastname
         if user_data.phone is not None:
             user.phone = user_data.phone
+        # Si se actualiza countryId/stateId validar existencia
+
         if user_data.countryId is not None:
+            country_repo = CountryRepositoryImpl()
+            country = await country_repo.get_by_id(user_data.countryId)
+            if not country:
+                raise UserValidationError('El countryId proporcionado no existe')
             user.countryId = user_data.countryId
         if user_data.stateId is not None:
+            state_repo = StateRepositoryImpl()
+            state = await state_repo.get_by_id(user_data.stateId)
+            if not state:
+                raise UserValidationError('El stateId proporcionado no existe')
             user.stateId = user_data.stateId
         
         user.updatedAt = datetime.now()

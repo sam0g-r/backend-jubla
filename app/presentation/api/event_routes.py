@@ -1,3 +1,4 @@
+from app.presentation.decorators.auth import require_roles
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.application.use_cases.event_use_cases import EventUseCases
@@ -5,8 +6,6 @@ from app.application.dto.event_dto import EventResponseDTO
 from app.application.odm.event_odm import CreaetEventODM, UpdateEventODM
 from app.presentation.dependencies import get_event_use_cases
 from app.shared.exceptions.event_exceptions import EventNotFoundError, EventAlreadyExistsError
-from supertokens_python.recipe.session.framework.fastapi import verify_session
-from supertokens_python.recipe.session import SessionContainer
 
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -15,7 +14,8 @@ router = APIRouter(prefix="/events", tags=["events"])
 async def get_events(
     skip: int = 0,
     limit: int = 100,
-    event_use_cases: EventUseCases = Depends(get_event_use_cases)
+    event_use_cases: EventUseCases = Depends(get_event_use_cases),
+    _=Depends(require_roles('OnBoarding, Financing, Admin, ParticipantManager, CoreEngineer')),
 ):
     events = await event_use_cases.list_active_events(skip=skip, limit=limit)
     return events
@@ -37,7 +37,7 @@ async def get_event_by_slug(
 @router.post("/create", response_model=EventResponseDTO, status_code=status.HTTP_201_CREATED)
 async def create_event(
     event_data: CreaetEventODM,
-    session: SessionContainer = Depends(verify_session()),
+    _=Depends(require_roles('Admin, CoreEngineer')),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
@@ -53,7 +53,7 @@ async def create_event(
 async def update_event(
     eventId: str,
     event_data: UpdateEventODM,
-    session: SessionContainer = Depends(verify_session()),
+    _=Depends(require_roles('Admin, CoreEngineer')),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:
@@ -68,7 +68,7 @@ async def update_event(
 @router.delete("/delete/{eventId}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event(
     eventId: str,
-    session: SessionContainer = Depends(verify_session()),
+    _=Depends(require_roles('CoreEngineer')),
     event_use_cases: EventUseCases = Depends(get_event_use_cases)
 ):
     try:

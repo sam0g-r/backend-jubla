@@ -14,6 +14,8 @@ class Reservation:
     eventId: str
     termsAccepted: bool = False
     imageRightsAccepted: bool = False
+    privacyAccepted: bool = False
+    pastorContact: Optional[str] = None
     reservationDate: datetime = field(default_factory=datetime.now)
     pastoralLetterUploaded: bool = False
     pastoralLetterUploadedAt: Optional[datetime] = None

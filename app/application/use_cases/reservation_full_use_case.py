@@ -5,16 +5,14 @@ from app.domain.repositories.user_medical_information_repository import UserMedi
 from app.domain.repositories.event_repository import EventRepository
 from app.domain.repositories.reservation_repository import ReservationRepository
 from app.domain.entities.reservation import Reservation
-from app.enums.payment_status_enum import PaymentStatusEnum
-from app.enums.reservation_status_enum import ReservationStatusEnum
 from datetime import datetime, date
 import base64
-from uuid import uuid4
-import os
-import asyncio
 
 from app.infrastructure.database.prisma_client import prisma_client
 from app.infrastructure.google_drive import upload_pdf_to_drive
+from app.shared.exceptions.user_exceptions import UserAlreadyExistsError, UserValidationError
+from app.infrastructure.repositories.country_repository_impl import CountryRepositoryImpl
+from app.infrastructure.repositories.state_repository_impl import StateRepositoryImpl
 
 
 class CreateFullReservationUseCase:
@@ -44,6 +42,31 @@ class CreateFullReservationUseCase:
 
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         generate_id = cuid_wrapper()
+
+        # Validaciones previas a la transacción
+        # 1) email no debe existir
+        existing_user = await self.user_repo.get_by_email(data['personalData']['email'])
+        if existing_user:
+            # Requerimiento: retornar 404 cuando el email ya existe
+            raise UserAlreadyExistsError(f"El email {data['personalData']['email']} ya está registrado")
+
+        # 2) password y confirmPassword deben coincidir
+        if data['personalData'].get('password') != data['personalData'].get('confirmPassword'):
+            raise UserValidationError('Las contraseñas no coinciden')
+
+        # 3) validar countryId / stateId existen en la BD (si fueron provistos)
+        country_repo = CountryRepositoryImpl()
+        state_repo = StateRepositoryImpl()
+        country_id = data['personalData'].get('countryId')
+        state_id = data['personalData'].get('stateId')
+        if country_id:
+            country = await country_repo.get_by_id(country_id)
+            if not country:
+                raise UserValidationError('El countryId proporcionado no existe')
+        if state_id:
+            state = await state_repo.get_by_id(state_id)
+            if not state:
+                raise UserValidationError('El stateId proporcionado no existe')
 
         # Normalize incoming date fields that may be python date objects (Prisma expects serializable values)
         personal_data = data.get('personalData', {})
@@ -78,11 +101,14 @@ class CreateFullReservationUseCase:
         from app.infrastructure.adapters.drive_adapter import DriveAdapter
 
         payment_data = data.get('paymentData') or {}
-        paypal_order_id = payment_data.get('orderId') or payment_data.get('paypalOrderId')
-        paypal_summary = None
-        if paypal_order_id:
-            paypal_adapter = PaypalAdapter()
-            paypal_summary = await paypal_adapter.get_order_summary(paypal_order_id)
+        if payment_data.get('paymentMethod') == 'paypal':
+            paypal_order_id = payment_data.get('orderId') or payment_data.get('paypalOrderId')
+            paypal_summary = None
+            if paypal_order_id:
+                paypal_adapter = PaypalAdapter()
+                paypal_summary = await paypal_adapter.get_order_summary(paypal_order_id)
+        elif payment_data.get('paymentMethod') == 'transferencia':
+            transfer_receipt = payment_data.get('transferReceipt')
 
         # construir payloads a pasar al repositorio transaccional
         userId = generate_id()
@@ -95,16 +121,19 @@ class CreateFullReservationUseCase:
             'lastname': data['personalData']['lastname'],
             'birthdate': data['personalData']['birthdate'],
             'phone': data['personalData'].get('phone'),
+            'gender': data['personalData'].get('gender'),
+            'documentId': data['personalData'].get('documentId'),
+            'profession': data['personalData'].get('profession'),
+            'instagramProfile': data['personalData'].get('instagramProfile'),
             'password': hashed_password,
             'church': data['churchData']['church'],
+            'birthCountry': data['personalData']['birthCountry'],
+            'country': {'connect': {'id': data['personalData']['countryId']}},
+            'state': {'connect': {'id': data['personalData']['stateId']}}
         }
-        if data['personalData'].get('countryId'):
-            user_create_data['country'] = {'connect': {'id': data['personalData']['countryId']}}
-        if data['personalData'].get('stateId'):
-            user_create_data['state'] = {'connect': {'id': data['personalData']['stateId']}}
 
         med_payload = {
-            'id': str(uuid4()),
+            'id': cuid_wrapper,
             'emergencyContactName': data['medicalData']['emergencyContactName'],
             'emergencyContactPhone': data['medicalData']['emergencyContactPhone'],
             'emergencyContactRelationship': data['medicalData']['emergencyContactRelationship'],
@@ -126,7 +155,16 @@ class CreateFullReservationUseCase:
 
         file_metadata = None
         if pastoral_b64:
-            file_name = f"pastoral_letter_{uuid4()}.pdf"
+            file_name = f"pastoral_letter_{cuid_wrapper}.pdf"
+            file_metadata = {
+                'name': file_name,
+                'mimeType': 'application/pdf',
+                'driveFileId': '',
+                'url': '',
+                'fileableType': 'USER',
+            }
+        if transfer_receipt:
+            file_name = f"transfer_receipt_{cuid_wrapper}.pdf"
             file_metadata = {
                 'name': file_name,
                 'mimeType': 'application/pdf',
@@ -204,9 +242,11 @@ class CreateFullReservationUseCase:
             eventId=reservation_db.eventId,
             termsAccepted=reservation_db.termsAccepted,
             imageRightsAccepted=reservation_db.imageRightsAccepted,
+            privacyAccepted=reservation_db.privacyAccepted,
             reservationDate=to_datetime(reservation_db.reservationDate),
             pastoralLetterUploaded=reservation_db.pastoralLetterUploaded,
             pastoralLetterUploadedAt=to_datetime(reservation_db.pastoralLetterUploadedAt),
+            pastorContact=reservation_db.pastorContact,
             paymentCompletedAt=to_datetime(reservation_db.paymentCompletedAt),
             paymentStatus=reservation_db.paymentStatus,
             status=reservation_db.status,

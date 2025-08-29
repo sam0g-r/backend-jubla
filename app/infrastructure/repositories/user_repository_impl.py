@@ -1,5 +1,4 @@
 from typing import List, Optional
-from datetime import datetime
 from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
 from app.infrastructure.database.prisma_client import prisma_client
@@ -16,6 +15,10 @@ class UserRepositoryImpl(UserRepository):
             firstname=db_user.firstname,
             lastname=db_user.lastname,
             birthdate=db_user.birthdate,
+            gender=getattr(db_user, 'gender', None),
+            documentId=getattr(db_user, 'documentId', None),
+            profession=getattr(db_user, 'profession', None),
+            instagramProfile=getattr(db_user, 'instagramProfile', None),
             countryId=db_user.countryId,
             stateId=db_user.stateId,
             phone=db_user.phone,
@@ -30,21 +33,24 @@ class UserRepositoryImpl(UserRepository):
 
     async def create(self, user: User) -> User:
         """Crear un nuevo usuario en la base de datos"""
-        async with prisma_client as client:
-            db_user = await client.client.user.create(
-                data={
-                    "email": user.email,
-                    "firstname": user.firstname,
-                    "lastname": user.lastname,
-                    "birthdate": user.birthdate,
-                    "countryId": user.countryId,
-                    "stateId": user.stateId,
-                    "phone": user.phone,
-                    "password": user.password,
-                    "church": user.church,
-                }
-            )
-            return self._to_entity(db_user)
+        db_user = await prisma_client.client.user.create(
+            data={
+                "email": user.email,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "birthdate": user.birthdate,
+                "countryId": user.countryId,
+                "gender": getattr(user, 'gender', None),
+                "documentId": getattr(user, 'documentId', None),
+                "profession": getattr(user, 'profession', None),
+                "instagramProfile": getattr(user, 'instagramProfile', None),
+                "stateId": user.stateId,
+                "phone": user.phone,
+                "password": user.password,
+                "church": user.church,
+            }
+        )
+        return self._to_entity(db_user)
 
     async def get_by_id(self, userId: str) -> Optional[User]:
         """Obtener usuario por ID"""
@@ -69,6 +75,10 @@ class UserRepositoryImpl(UserRepository):
                 "lastname": user.lastname,
                 "phone": user.phone,
                 "countryId": user.countryId,
+                "gender": getattr(user, 'gender', None),
+                "documentId": getattr(user, 'documentId', None),
+                "profession": getattr(user, 'profession', None),
+                "instagramProfile": getattr(user, 'instagramProfile', None),
                 "stateId": user.stateId,
                 "church": user.church,
                 "isActive": user.isActive,

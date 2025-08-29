@@ -23,6 +23,8 @@ class ReservationDTO(BaseModel):
     paymentCompletedAt: Optional[datetime] = None
     termsAccepted: bool = False
     imageRightsAccepted: bool = False
+    privacyAccepted: bool = False
+    pastorContact: Optional[str] = None
 
     @classmethod
     def from_entity(cls, reservation):
@@ -85,6 +87,8 @@ class ReservationDTO(BaseModel):
             paymentCompletedAt=reservation_paymentCompletedAt,
             termsAccepted=reservation.termsAccepted,
             imageRightsAccepted=reservation.imageRightsAccepted
+            ,privacyAccepted=getattr(reservation, 'privacyAccepted', False)
+            ,pastorContact=getattr(reservation, 'pastorContact', None)
         )
     
 class ReservationQueryDTO(BaseModel):
