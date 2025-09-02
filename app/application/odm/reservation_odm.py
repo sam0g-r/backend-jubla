@@ -75,7 +75,6 @@ class CreateReservationODM(BaseModel):
     pastorContact: Optional[str] = None
     reservationDate: Optional[datetime]
     pastoralLetterUploaded: bool = False
-    pastoralLetterUploadedAt: Optional[datetime] = None
     paymentCompletedAt: Optional[datetime] = None
     paymentStatus: Optional[str] = None
     status: Optional[str] = None
@@ -86,8 +85,6 @@ class UpdateReservationODM(BaseModel):
     imageRightsAccepted: Optional[bool] = None
     privacyAccepted: Optional[bool] = None
     pastorContact: Optional[str] = None
-    pastoralLetterUploaded: Optional[bool] = None
-    pastoralLetterUploadedAt: Optional[datetime] = None
-    paymentCompletedAt: Optional[datetime] = None
-    paymentStatus: Optional[str] = None
-    status: Optional[str] = None
+    pastoralLetter: Optional[str] = None ## Base64 encoded PDF
+    paypalOrderId: Optional[str] = None
+    transferReceipt: Optional[str] = None

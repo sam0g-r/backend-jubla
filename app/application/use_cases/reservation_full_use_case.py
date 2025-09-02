@@ -8,6 +8,7 @@ from app.domain.entities.reservation import Reservation
 from datetime import datetime, date
 import base64
 
+from app.enums.reservation_status_enum import ReservationStatusEnum
 from app.infrastructure.database.prisma_client import prisma_client
 from app.infrastructure.google_drive import upload_pdf_to_drive
 from app.shared.exceptions.user_exceptions import UserAlreadyExistsError, UserValidationError
@@ -94,6 +95,7 @@ class CreateFullReservationUseCase:
         # variables para uso fuera de la transacción (por ejemplo upload a Drive)
         files_record = None
         pastoral_b64 = data['churchData'].get('pastoralLetter')
+        transfer_receipt = None
 
         # Obtener datos de pago (detalles se pedirán a PayPal antes de la transacción si es necesario)
         # use adapter to normalize PayPal info
@@ -102,7 +104,7 @@ class CreateFullReservationUseCase:
 
         payment_data = data.get('paymentData') or {}
         if payment_data.get('paymentMethod') == 'paypal':
-            paypal_order_id = payment_data.get('orderId') or payment_data.get('paypalOrderId')
+            paypal_order_id = payment_data.get('paypalOrderId')
             paypal_summary = None
             if paypal_order_id:
                 paypal_adapter = PaypalAdapter()
@@ -133,7 +135,7 @@ class CreateFullReservationUseCase:
         }
 
         med_payload = {
-            'id': cuid_wrapper,
+            'id': generate_id(),
             'emergencyContactName': data['medicalData']['emergencyContactName'],
             'emergencyContactPhone': data['medicalData']['emergencyContactPhone'],
             'emergencyContactRelationship': data['medicalData']['emergencyContactRelationship'],
@@ -155,7 +157,7 @@ class CreateFullReservationUseCase:
 
         file_metadata = None
         if pastoral_b64:
-            file_name = f"pastoral_letter_{cuid_wrapper}.pdf"
+            file_name = f"pastoral_letter_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
             file_metadata = {
                 'name': file_name,
                 'mimeType': 'application/pdf',
@@ -164,7 +166,7 @@ class CreateFullReservationUseCase:
                 'fileableType': 'USER',
             }
         if transfer_receipt:
-            file_name = f"transfer_receipt_{cuid_wrapper}.pdf"
+            file_name = f"transfer_receipt_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
             file_metadata = {
                 'name': file_name,
                 'mimeType': 'application/pdf',
@@ -185,11 +187,29 @@ class CreateFullReservationUseCase:
                 'payer_email': paypal_summary.get('payer_email'),
             }
 
+        
+        reservation_payload = {
+            'id': generate_id(),
+            'termsAccepted': data['personalData']['terms'],
+            'imageRightsAccepted': data['personalData']['imageTerms'],
+            'privacyAccepted': data['personalData']['privacyAccepted'],
+            'pastorContact':data['churchData']['pastorContact'],
+            'reservationDate': datetime.now(),
+            'pastoralLetterUploaded': False,
+            'pastoralLetterUploadedAt': None,
+            'paymentCompletedAt': None,
+            'paymentStatus': 'PENDING',
+            'status': ReservationStatusEnum.PENDING_BOTH.value,
+            'createdAt': datetime.now(),
+            'userId': userId,
+            'eventId': event.id,
+        }
+
         # llamar al repositorio transaccional
         created = await self.reservation_repo.create_full_transactional(
             user_payload=user_create_data,
             medical_payload=med_payload,
-            eventId=event.id,
+            reservation_payload=reservation_payload,
             payment_payload=payment_payload,
             file_metadata=file_metadata,
         )
@@ -213,13 +233,39 @@ class CreateFullReservationUseCase:
                             'url': drive_resp.get('webViewLink', ''),
                         })
                     else:
-                        await prisma_client.client.files.update({
-                            'where': {'id': files_record.id},
-                            'data': {
+                        await prisma_client.client.files.update(
+                            where={'id': files_record.id},
+                            data={
                                 'driveFileId': drive_resp.get('id', ''),
                                 'url': drive_resp.get('webViewLink', ''),
                             },
+                        )
+            except Exception:
+                # fallo en upload: registrar y continuar; la transacción DB ya fue comprometida
+                pass
+
+        # Si se proporcionó un comprobante de transferencia (transfer_receipt), subirlo igual que la carta pastoral
+        # Nota: el repositorio transaccional crea un único registro de archivo usando el `file_metadata` enviado.
+        # La lógica aquí asume que `files_record` referencia el archivo creado para el comprobante actual.
+        if transfer_receipt and files_record:
+            try:
+                raw_tr = base64.b64decode(transfer_receipt.split(',')[-1] if ',' in transfer_receipt else transfer_receipt)
+                drive_adapter = DriveAdapter()
+                drive_resp = await drive_adapter.upload_pdf(files_record.name, raw_tr)
+                if drive_resp:
+                    if self.file_repo:
+                        await self.file_repo.update(files_record.id, {
+                            'driveFileId': drive_resp.get('id', ''),
+                            'url': drive_resp.get('webViewLink', ''),
                         })
+                    else:
+                        await prisma_client.client.files.update(
+                            where={'id': files_record.id},
+                            data={
+                                'driveFileId': drive_resp.get('id', ''),
+                                'url': drive_resp.get('webViewLink', ''),
+                            },
+                        )
             except Exception:
                 # fallo en upload: registrar y continuar; la transacción DB ya fue comprometida
                 pass

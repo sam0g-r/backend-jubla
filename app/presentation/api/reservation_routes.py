@@ -41,7 +41,7 @@ def _normalize_dates(obj: Any):
 @router.post("/full-create", response_model=ReservationDTO, status_code=status.HTTP_201_CREATED)
 async def create_full_reservation(
     reservation_data: CreateFullReservationODM,
-    _=Depends(require_roles('OnBoarding, Financing, Admin, Participant, ParticipantManager, CoreEngineer')),
+    #_=Depends(require_roles('OnBoarding, Financing, Admin, Participant, ParticipantManager, CoreEngineer')),
 ):
     user_repo = UserRepositoryImpl()
     medical_repo = UserMedicalInformationRepositoryImpl()

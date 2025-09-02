@@ -34,3 +34,17 @@ class ReservationRepository(ABC):
         Devuelve un dict con los objetos DB creados mínimos: reservation, files (if any), payment, paypal_detail.
         """
         pass
+
+    @abstractmethod
+    async def create_file_for_reservation(self, reservationId: str, file_metadata: dict, is_pastoral: bool) -> dict:
+        """Crear un registro de `files` y actualizar la reserva asociada si es carta pastoral.
+        Debe ejecutarse dentro de una transacción en la implementación.
+        Retorna dict {'files': files_record, 'reservation': reservation_db}
+        """
+
+    @abstractmethod
+    async def create_payment_for_reservation(self, reservationId: str, payment_payload: dict, paypal_raw: dict | None = None) -> dict:
+        """Crear payment, paypalpaymentdetail (si aplica) y reservationspayments en una transacción.
+        Actualiza paymentStatus y status de la reserva según reglas de negocio.
+        Retorna dict {'payment': payment_db, 'paypal_detail': paypal_detail_db, 'reservation': reservation_db}
+        """
