@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 import os
 
 class Settings(BaseSettings):
@@ -40,8 +40,12 @@ class Settings(BaseSettings):
     ENVIRONMENT: str
     DEBUG: bool
 
+    # Resend (email delivery) - opcionales
+    RESEND_API_KEY: Optional[str] = None
+    RESEND_FROM_EMAIL: Optional[str] = None
+
     class Config:
         env_file = ".env"
         case_sensitive = True
 
-settings = Settings() 
+settings = Settings()

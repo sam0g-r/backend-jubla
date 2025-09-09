@@ -134,3 +134,20 @@ docker run -p 8000:8000 --env-file .env jubla-backend
 ## 📝 Licencia
 
 Este proyecto está bajo la licencia MIT.
+
+## 📧 Envío de correos con Resend
+
+Este proyecto incluye una integración mínima con Resend (https://resend.com) para enviar correos transaccionales.
+
+- Añade tu API key a `.env` (puedes copiar `env.example`):
+
+```bash
+RESEND_API_KEY=re_XXXXXXXXXXXX
+RESEND_FROM_EMAIL=notifications@yourdomain.com
+```
+
+- El servicio está en `app.infrastructure.email.resend_service.ResendService` y se usa de forma "best-effort" al crear reservas.
+
+Notas:
+- La librería `httpx` ya figura en `requirements.txt`. Instala dependencias con `pip install -r requirements.txt`.
+- Si quieres enviar correos de manera fiable en producción, considera encolar el envío (Celery / BackgroundTasks) y agregar métricas/logs.

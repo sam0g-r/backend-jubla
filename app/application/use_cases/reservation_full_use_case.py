@@ -101,6 +101,7 @@ class CreateFullReservationUseCase:
         # use adapter to normalize PayPal info
         from app.infrastructure.adapters.paypal_adapter import PaypalAdapter
         from app.infrastructure.adapters.drive_adapter import DriveAdapter
+        from app.infrastructure.email.resend_service import ResendService
 
         payment_data = data.get('paymentData') or {}
         if payment_data.get('paymentMethod') == 'paypal':
@@ -282,7 +283,8 @@ class CreateFullReservationUseCase:
                 return datetime.combine(val, datetime.min.time())
             return val
 
-        return ReservationEntity(
+        # Construir la entidad que vamos a retornar
+        reservation_entity = ReservationEntity(
             id=reservation_db.id,
             userId=reservation_db.userId,
             eventId=reservation_db.eventId,
@@ -299,6 +301,38 @@ class CreateFullReservationUseCase:
             createdAt=to_datetime(reservation_db.createdAt),
             updatedAt=to_datetime(reservation_db.updatedAt),
         )
+
+        # Enviar email de confirmación (best-effort)
+        try:
+            # intentar obtener email del user creado a partir de created
+            user_obj = created.get('user') if isinstance(created, dict) else getattr(created, 'user', None)
+
+            def _get_attr(o, k):
+                if o is None:
+                    return None
+                if isinstance(o, dict):
+                    return o.get(k)
+                return getattr(o, k, None)
+
+            user_email = _get_attr(user_obj, 'email')
+            first_name = _get_attr(user_obj, 'firstname') or _get_attr(user_obj, 'firstName') or ''
+
+            if user_email:
+                try:
+                    resend = ResendService()
+                    subject = f"Confirmación de inscripción - {event.title}"
+                    html = f"<p>Hola {first_name},</p><p>Tu inscripción al evento <strong>{event.title}</strong> se ha creado correctamente. Tu reserva ID es <code>{reservation_db.id}</code>.</p>"
+                    # programar envío en background (no bloquear la respuesta)
+                    import asyncio
+
+                    asyncio.create_task(resend.send_email(to=user_email, subject=subject, html=html))
+                except Exception:
+                    # no queremos romper el flujo por fallos en el email
+                    pass
+        except Exception:
+            pass
+
+        return reservation_entity
 
     async def validate_event(self, slug: str):
         event_use_case = EventUseCases(self.event_repo)
