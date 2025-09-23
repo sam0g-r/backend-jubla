@@ -1,3 +1,10 @@
-from . import user_routes, event_routes, reservation_routes, user_medical_information_routes
+from . import user_routes, event_routes, reservation_routes, user_medical_information_routes, user_role_routes, role_permission_routes
 
-__all__ = ["user_routes", "event_routes", "reservation_routes", "user_medical_information_routes"]
+__all__ = [
+	"user_routes",
+	"event_routes",
+	"reservation_routes",
+	"user_medical_information_routes",
+	"user_role_routes",
+	"role_permission_routes",
+]
