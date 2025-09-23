@@ -53,8 +53,8 @@ class ChurchDataODM(BaseModel):
 
 
 class PaymentDataODM(BaseModel):
-    paymentMethod: str
     slug: str
+    paymentMethod: Optional[str] = None
     paypalOrderId: Optional[str] = None
     transferReceipt: Optional[str] = None
 

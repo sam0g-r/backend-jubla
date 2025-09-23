@@ -155,25 +155,27 @@ class CreateFullReservationUseCase:
             'createdAt': datetime.now(),
         }
 
-        file_metadata = None
+        # Prepare metadata list for any files that should be created for this user
+        # We allow multiple files (e.g. pastoral letter and transfer receipt)
+        file_metadata = []
         if pastoral_b64:
             file_name = f"pastoral_letter_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
-            file_metadata = {
+            file_metadata.append({
                 'name': file_name,
                 'mimeType': 'application/pdf',
                 'driveFileId': '',
                 'url': '',
                 'fileableType': 'USER',
-            }
+            })
         if transfer_receipt:
             file_name = f"transfer_receipt_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
-            file_metadata = {
+            file_metadata.append({
                 'name': file_name,
                 'mimeType': 'application/pdf',
                 'driveFileId': '',
                 'url': '',
                 'fileableType': 'USER',
-            }
+            })
 
         payment_payload = None
         if paypal_summary is not None:
@@ -206,12 +208,13 @@ class CreateFullReservationUseCase:
         }
 
         # llamar al repositorio transaccional
+        # Pass list of file metadata (could be empty) to the transactional creation
         created = await self.reservation_repo.create_full_transactional(
             user_payload=user_create_data,
             medical_payload=med_payload,
             reservation_payload=reservation_payload,
             payment_payload=payment_payload,
-            file_metadata=file_metadata,
+            file_metadata=file_metadata if file_metadata else None,
         )
 
         # FIN transacción
@@ -219,56 +222,97 @@ class CreateFullReservationUseCase:
         files_record = created.get('files')
         payment_db = created.get('payment')
         reservation_db = created.get('reservation')
+        # Subir los PDFs a Google Drive después de que la transacción haya sido confirmada
+        # Construir lista de items a subir: (b64_string, filename)
+        upload_items = []
+        if pastoral_b64:
+            upload_items.append((pastoral_b64, f"pastoral_letter_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"))
+        if transfer_receipt:
+            upload_items.append((transfer_receipt, f"transfer_receipt_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"))
 
-        # Subir el PDF a Google Drive después de que la transacción haya sido confirmada
-        if pastoral_b64 and files_record:
-            try:
-                raw = base64.b64decode(pastoral_b64.split(',')[-1] if ',' in pastoral_b64 else pastoral_b64)
-                drive_adapter = DriveAdapter()
-                drive_resp = await drive_adapter.upload_pdf(files_record.name, raw)
-                if drive_resp:
-                    if self.file_repo:
-                        await self.file_repo.update(files_record.id, {
-                            'driveFileId': drive_resp.get('id', ''),
-                            'url': drive_resp.get('webViewLink', ''),
-                        })
-                    else:
-                        await prisma_client.client.files.update(
-                            where={'id': files_record.id},
-                            data={
-                                'driveFileId': drive_resp.get('id', ''),
-                                'url': drive_resp.get('webViewLink', ''),
-                            },
-                        )
-            except Exception:
-                # fallo en upload: registrar y continuar; la transacción DB ya fue comprometida
-                pass
+        # Normalize files_record into a list so we can map uploads to DB records
+        files_list = []
+        if files_record:
+            # The transactional repo might return a single record, a list, or None
+            if isinstance(files_record, list):
+                files_list = files_record
+            else:
+                files_list = [files_record]
 
-        # Si se proporcionó un comprobante de transferencia (transfer_receipt), subirlo igual que la carta pastoral
-        # Nota: el repositorio transaccional crea un único registro de archivo usando el `file_metadata` enviado.
-        # La lógica aquí asume que `files_record` referencia el archivo creado para el comprobante actual.
-        if transfer_receipt and files_record:
+        # If there are more upload_items than DB file records, create missing file records
+        # using prisma_client directly (best-effort). We create minimal records matching schema.
+        if len(upload_items) > len(files_list):
+            for i in range(len(upload_items) - len(files_list)):
+                idx = len(files_list) + i
+                name = upload_items[idx][1]
+                try:
+                    new_file = await prisma_client.client.files.create(
+                        data={
+                            'name': name,
+                            'mimeType': 'application/pdf',
+                            'driveFileId': '',
+                            'url': '',
+                            'fileableType': 'USER',
+                            'createdAt': datetime.now(),
+                        }
+                    )
+                    files_list.append(new_file)
+                except Exception as e:
+                    # If creation fails, log and continue; we'll still try uploads but may not update DB
+                    print(f"Warning: failed to create file record for {name}: {e}")
+
+        # Now upload each item and update its corresponding file record if present
+        for idx, (b64str, filename) in enumerate(upload_items):
+            # Validate and decode base64 safely
             try:
-                raw_tr = base64.b64decode(transfer_receipt.split(',')[-1] if ',' in transfer_receipt else transfer_receipt)
+                raw = base64.b64decode(b64str.split(',')[-1] if ',' in b64str else b64str)
+            except Exception as e:
+                print(f"Warning: invalid base64 for file {filename}: {e}")
+                continue
+
+            try:
                 drive_adapter = DriveAdapter()
-                drive_resp = await drive_adapter.upload_pdf(files_record.name, raw_tr)
+                drive_resp = await drive_adapter.upload_pdf(filename, raw)
                 if drive_resp:
-                    if self.file_repo:
-                        await self.file_repo.update(files_record.id, {
-                            'driveFileId': drive_resp.get('id', ''),
-                            'url': drive_resp.get('webViewLink', ''),
-                        })
+                    file_record = files_list[idx] if idx < len(files_list) else None
+                    update_data = {
+                        'driveFileId': drive_resp.get('id', ''),
+                        'url': drive_resp.get('webViewLink', '') or drive_resp.get('webContentLink', ''),
+                    }
+                    if file_record:
+                        if self.file_repo:
+                            # Assume file_repo.update(id, data) signature; fall back to prisma if different
+                            try:
+                                await self.file_repo.update(file_record.id, update_data)
+                            except Exception:
+                                await prisma_client.client.files.update(
+                                    where={'id': file_record.id},
+                                    data=update_data,
+                                )
+                        else:
+                            await prisma_client.client.files.update(
+                                where={'id': file_record.id},
+                                data=update_data,
+                            )
                     else:
-                        await prisma_client.client.files.update(
-                            where={'id': files_record.id},
-                            data={
-                                'driveFileId': drive_resp.get('id', ''),
-                                'url': drive_resp.get('webViewLink', ''),
-                            },
-                        )
-            except Exception:
+                        # No file record to update; try creating a record with drive info
+                        try:
+                            await prisma_client.client.files.create(
+                                data={
+                                    'name': filename,
+                                    'mimeType': 'application/pdf',
+                                    'driveFileId': drive_resp.get('id', ''),
+                                    'url': drive_resp.get('webViewLink', '') or drive_resp.get('webContentLink', ''),
+                                    'fileableType': 'USER',
+                                    'createdAt': datetime.now(),
+                                }
+                            )
+                        except Exception as e:
+                            print(f"Warning: failed to create file record after upload for {filename}: {e}")
+            except Exception as e:
                 # fallo en upload: registrar y continuar; la transacción DB ya fue comprometida
-                pass
+                print(f"Warning: failed to upload {filename} to Drive: {e}")
+                continue
 
         # Mapear a la entidad de dominio Reservation y devolver
         from app.domain.entities.reservation import Reservation as ReservationEntity
