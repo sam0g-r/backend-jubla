@@ -4,7 +4,7 @@ from supertokens_python.framework.fastapi import get_middleware
 from app.infrastructure.database.prisma_client import prisma_client
 from fastapi import FastAPI
 from app.presentation.middleware.cors_middleware import CORSMiddleware as CustomCORSMiddleware
-from app.presentation.api import auth_routes, user_routes, event_routes, reservation_routes, user_medical_information_routes
+from app.presentation.api import auth_routes, user_routes, event_routes, reservation_routes, user_medical_information_routes, location_routes
 from app.shared.config.settings import settings
 
 app = FastAPI(
@@ -39,6 +39,7 @@ app.include_router(event_routes.router, prefix="/api/v1")
 app.include_router(auth_routes.router, prefix="/api/v1")
 app.include_router(reservation_routes.router, prefix="/api/v1")
 app.include_router(user_medical_information_routes.router, prefix="/api/v1")
+app.include_router(location_routes.router, prefix="/api/v1")
 
 @app.get("/")
 async def root():

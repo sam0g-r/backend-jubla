@@ -11,7 +11,11 @@ router = APIRouter(prefix="/locations", tags=["locations"])
 @router.get("/countries", response_model=List[CountryResponseDTO])
 async def list_countries(
     skip: int = 0,
+<<<<<<< HEAD
     limit: int = 999,
+=======
+    limit: int = 100,
+>>>>>>> 97903a56a094bfaa5b01c2b21140a448258a6b40
     location_use_cases: LocationUseCases = Depends(get_location_use_cases),
 ):
     return await location_use_cases.list_countries(skip=skip, limit=limit)
@@ -21,7 +25,11 @@ async def list_countries(
 async def list_states(
     country_id: str,
     skip: int = 0,
+<<<<<<< HEAD
     limit: int = 999,
+=======
+    limit: int = 100,
+>>>>>>> 97903a56a094bfaa5b01c2b21140a448258a6b40
     location_use_cases: LocationUseCases = Depends(get_location_use_cases),
 ):
     return await location_use_cases.list_states(country_id=country_id, skip=skip, limit=limit)
@@ -31,7 +39,11 @@ async def list_states(
 async def list_cities(
     state_id: str,
     skip: int = 0,
+<<<<<<< HEAD
     limit: int = 999,
+=======
+    limit: int = 100,
+>>>>>>> 97903a56a094bfaa5b01c2b21140a448258a6b40
     location_use_cases: LocationUseCases = Depends(get_location_use_cases),
 ):
     return await location_use_cases.list_cities(state_id=state_id, skip=skip, limit=limit)
@@ -41,7 +53,11 @@ async def list_cities(
 async def list_cities_by_country(
     country_id: str,
     skip: int = 0,
+<<<<<<< HEAD
     limit: int = 999,
+=======
+    limit: int = 100,
+>>>>>>> 97903a56a094bfaa5b01c2b21140a448258a6b40
     location_use_cases: LocationUseCases = Depends(get_location_use_cases),
 ):
     return await location_use_cases.list_cities_by_country(country_id=country_id, skip=skip, limit=limit)
