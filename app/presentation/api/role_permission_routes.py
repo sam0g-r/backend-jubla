@@ -16,7 +16,7 @@ router = APIRouter(prefix="/role-permissions", tags=["role-permissions"])
 
 
 @router.post("/create", response_model=RolePermission, status_code=status.HTTP_201_CREATED)
-async def create_role_permission(data: CreateRolePermissionODM, _=Depends(require_roles('CoreEngineer'))):
+async def create_role_permission(data: CreateRolePermissionODM):
     repo = RolePermissionRepositoryImpl()
     use_case = CreateRolePermissionUseCase(repo)
     try:
@@ -27,7 +27,7 @@ async def create_role_permission(data: CreateRolePermissionODM, _=Depends(requir
 
 
 @router.get("/get", response_model=List[RolePermission])
-async def list_role_permissions(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1), roleId: Optional[str] = None, _=Depends(require_roles('CoreEngineer'))):
+async def list_role_permissions(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1), roleId: Optional[str] = None):
     filters = {}
     if roleId:
         filters["roleId"] = roleId

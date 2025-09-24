@@ -3,6 +3,7 @@ from datetime import datetime
 from app.domain.entities.user import User
 from app.domain.repositories.user_repository import UserRepository
 from app.application.dto.user_dto import CreateUserDTO, UpdateUserDTO, UserResponseDTO
+from app.domain.services.user_singup import UserSignUp
 from app.infrastructure.database.prisma_client import with_prisma
 from app.infrastructure.repositories.country_repository_impl import CountryRepositoryImpl
 from app.infrastructure.repositories.state_repository_impl import StateRepositoryImpl
@@ -13,8 +14,9 @@ from cuid2 import cuid_wrapper
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserUseCases:
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: UserRepository, user_signup: UserSignUp):
         self.user_repository = user_repository
+        self.user_signup = user_signup
     
     async def create_user(self, user_data: CreateUserDTO) -> UserResponseDTO:
         # Verificar si el usuario ya existe
@@ -50,6 +52,7 @@ class UserUseCases:
         )
         
         # Guardar en repositorio
+        await self.user_signup.register(email=user_data.email, password=hashed_password)
         created_user = await self.user_repository.create(user)
         return UserResponseDTO.from_entity(created_user)
     
@@ -120,3 +123,6 @@ class UserUseCases:
         if not user or not await self.verify_password(password, user.password):
             raise InvalidCredentialsError("Invalid credentials")
         return user
+
+    async def execute(self, limit: int = 10, pagination_token: str = None):
+        return await self.list_all(limit, pagination_token)

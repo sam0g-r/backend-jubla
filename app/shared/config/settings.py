@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     # Google configuration
     GOOGLE_DRIVE_FOLDER_ID: str
     GOOGLE_SERVICE_ACCOUNT: str
+
+    # Resend
+    RESEND_API_KEY: str
+    RESEND_FROM_EMAIL: str
+
+    # Supertokens
+    SUPERTOKENS_API_KEY: str
     
     # Environment
     ENVIRONMENT: str

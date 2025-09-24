@@ -8,6 +8,7 @@ from app.domain.entities.reservation import Reservation
 from datetime import datetime, date
 import base64
 
+from app.domain.services.user_singup import UserSignUp
 from app.enums.reservation_status_enum import ReservationStatusEnum
 from app.infrastructure.database.prisma_client import prisma_client
 from app.infrastructure.google_drive import upload_pdf_to_drive
@@ -23,6 +24,7 @@ class CreateFullReservationUseCase:
         medical_repo: UserMedicalInformationRepository,
         event_repo: EventRepository,
         reservation_repo: ReservationRepository,
+        user_signup: UserSignUp,
         file_repo=None,
     ):
         self.user_repo = user_repo
@@ -30,6 +32,7 @@ class CreateFullReservationUseCase:
         self.event_repo = event_repo
         self.reservation_repo = reservation_repo
         self.file_repo = file_repo
+        self.user_signup = user_signup
 
     async def execute(self, data: Dict[str, Any]) -> Reservation:
         # 1. Validar evento
@@ -218,6 +221,9 @@ class CreateFullReservationUseCase:
         )
 
         # FIN transacción
+
+        # Crear Supertokens user
+        await self.user_signup.register(email=data['personalData']['email'], password=hashed_password)
 
         files_record = created.get('files')
         payment_db = created.get('payment')

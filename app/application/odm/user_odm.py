@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 from app.domain.value_objects import CuidStr
 
@@ -18,3 +18,19 @@ class UpdateUserODM(BaseModel):
     profession: Optional[str] = None
     instagramProfile: Optional[str] = None
     birthCountry: Optional[CuidStr] = None
+
+class CreateUserODM(BaseModel):
+    firstname: str
+    lastname: str
+    email: EmailStr
+    birthdate: datetime
+    gender: Optional[str] = None
+    documentId: Optional[str] = None
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
+    birthCountry: str
+    phone: str
+    countryId: str
+    stateId: str
+    password: str
+    church: str

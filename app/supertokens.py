@@ -1,3 +1,4 @@
+import os
 from supertokens_python import init, InputAppInfo, SupertokensConfig
 from supertokens_python.recipe import session, emailpassword
 from app.shared.config.settings import settings
@@ -13,7 +14,8 @@ def init_supertokens():
             website_base_path='/auth'
         ),
         supertokens_config=SupertokensConfig(
-            connection_uri='https://try.supertokens.com/'
+            connection_uri='https://auth--supertokensjubla--yfqk8y7vjnjc.code.run/',
+            api_key=os.getenv('SUPERTOKENS_API_KEY')
         ),
         framework='fastapi',
         recipe_list=[

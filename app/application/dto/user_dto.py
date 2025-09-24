@@ -39,6 +39,9 @@ class UserResponseDTO(BaseModel):
     birthdate: datetime
     gender: Optional[str] = None
     documentId: Optional[str] = None
+    profession: Optional[str] = None
+    instagramProfile: Optional[str] = None
+    birthCountry: str
     phone: str
     countryId: str
     stateId: str
@@ -61,6 +64,9 @@ class UserResponseDTO(BaseModel):
             birthdate=user.birthdate,
             gender=getattr(user, 'gender', None),
             documentId=getattr(user, 'documentId', None),
+            profession=getattr(user, 'profession', None),
+            instagramProfile=getattr(user, 'instagramProfile', None),
+            birthCountry=user.birthCountry,
             phone=user.phone,
             countryId=user.countryId,
             stateId=user.stateId,
