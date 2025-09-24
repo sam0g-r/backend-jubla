@@ -103,9 +103,9 @@ class CreateFullReservationUseCase:
         from app.infrastructure.adapters.drive_adapter import DriveAdapter
 
         payment_data = data.get('paymentData') or {}
+        paypal_summary = None
         if payment_data.get('paymentMethod') == 'paypal':
             paypal_order_id = payment_data.get('paypalOrderId')
-            paypal_summary = None
             if paypal_order_id:
                 paypal_adapter = PaypalAdapter()
                 paypal_summary = await paypal_adapter.get_order_summary(paypal_order_id)
