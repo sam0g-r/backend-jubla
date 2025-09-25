@@ -2,9 +2,9 @@ from app.application.dto.role_permission_dto import RolePermissionDTO
 from app.domain.entities.role_permission import RolePermission
 from app.domain.repositories.role_permission_repository import RolePermissionRepository
 from typing import Dict, Any, List, Optional, Tuple
-from uuid import uuid4
 from datetime import datetime
 from app.infrastructure.database.prisma_client import prisma_client
+from cuid2 import cuid_wrapper
 
 
 class CreateRolePermissionUseCase:
@@ -28,8 +28,8 @@ class CreateRolePermissionUseCase:
         exists = await prisma_client.client.rolepermission.find_first(where={"roleId": role_id, "permissionId": permission_id})
         if exists:
             raise Exception(f"RolePermission for role {role_id} and permission {permission_id} already exists")
-
-        rp = RolePermission(id=str(uuid4()), roleId=role_id, permissionId=permission_id, createdAt=datetime.now())
+        generate_id = cuid_wrapper()
+        rp = RolePermission(id=generate_id(), roleId=role_id, permissionId=permission_id, createdAt=datetime.now())
         created = await self.repo.create(rp)
         return RolePermissionDTO.from_entity(created)
 

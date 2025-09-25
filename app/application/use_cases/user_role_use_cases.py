@@ -2,9 +2,9 @@ from app.application.dto.user_role_dto import UserRoleDTO
 from app.domain.entities.user_role import UserRole
 from app.domain.repositories.user_role_repository import UserRoleRepository
 from typing import Dict, Any, List, Optional, Tuple
-from uuid import uuid4
 from datetime import datetime
 from app.infrastructure.database.prisma_client import prisma_client
+from cuid2 import cuid_wrapper
 
 
 class CreateUserRoleUseCase:
@@ -34,8 +34,9 @@ class CreateUserRoleUseCase:
             if not event:
                 raise Exception(f"Event with id {event_id} not found")
 
+        generate_id = cuid_wrapper()
         user_role = UserRole(
-            id=str(uuid4()),
+            id=generate_id(),
             userId=user_id,
             roleId=role_id,
             eventId=event_id,

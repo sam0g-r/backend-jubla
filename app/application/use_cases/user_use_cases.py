@@ -61,8 +61,7 @@ class UserUseCases:
         if not user:
             raise UserNotFoundError(f"User with id {userId} not found")
         return UserResponseDTO.from_entity(user)
-    
-    @with_prisma
+
     async def get_user_by_email(self, email: str) -> Optional[UserResponseDTO]:
         user = await self.user_repository.get_by_email(email)
         if not user:
@@ -75,6 +74,8 @@ class UserUseCases:
             raise UserNotFoundError(f"User with id {userId} not found")
         
         # Actualizar campos
+        if user_data.email is not None:
+            user.email = user_data.email
         if user_data.firstname is not None:
             user.firstname = user_data.firstname
         if user_data.lastname is not None:

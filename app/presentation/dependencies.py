@@ -38,3 +38,4 @@ def get_location_use_cases() -> LocationUseCases:
     state_repo = StateRepositoryImpl()
     city_repo = CityRepositoryImpl()
     return LocationUseCases(country_repo, state_repo, city_repo)
+    
