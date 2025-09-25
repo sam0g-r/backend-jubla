@@ -94,7 +94,7 @@ async def update_user(
     _=Depends(require_roles('Admin, Participant, ParticipantManager, CoreEngineer')),
 ):
     try:
-        user = await user_use_cases.update_user(userId, user_data.dict())
+        user = await user_use_cases.update_user(userId, user_data)
         return user
     except UserNotFoundError as e:
         raise HTTPException(

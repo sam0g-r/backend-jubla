@@ -73,6 +73,7 @@ class UserRepositoryImpl(UserRepository):
         db_user = await prisma_client.client.user.update(
             where={"id": user.id},
             data={
+                "email": user.email,
                 "firstname": user.firstname,
                 "lastname": user.lastname,
                 "phone": user.phone,

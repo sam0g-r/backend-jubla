@@ -2,7 +2,7 @@ from app.application.dto.user_medical_info_dto import UserMedicalInformationDTO
 from app.domain.entities.user_medical_information import UserMedicalInformation
 from app.domain.repositories.user_medical_information_repository import UserMedicalInformationRepository
 from typing import Dict, Any, List, Optional, Tuple
-from uuid import uuid4
+from cuid2 import cuid_wrapper
 from datetime import datetime
 
 class CreateUserMedicalInformationUseCase:
@@ -10,8 +10,9 @@ class CreateUserMedicalInformationUseCase:
         self.repo = repo
 
     async def execute(self, data: Dict[str, Any]) -> UserMedicalInformationDTO:
+        generated_id = cuid_wrapper()
         info = UserMedicalInformation(
-            id=str(uuid4()),
+            id=generated_id(),
             userId=data["userId"],
             hasPatologies=data.get("hasPatologies", False),
             hasMedication=data.get("hasMedication", False),

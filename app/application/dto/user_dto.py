@@ -1,6 +1,7 @@
+from app.application.dto.user_role_dto import UserRoleDTO
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 class CreateUserDTO(BaseModel):
     firstname: str
@@ -19,6 +20,7 @@ class CreateUserDTO(BaseModel):
     church: str
 
 class UpdateUserDTO(BaseModel):
+    email: Optional[EmailStr] = None
     firstname: Optional[str] = None
     lastname: Optional[str] = None
     phone: Optional[str] = None
@@ -50,6 +52,7 @@ class UserResponseDTO(BaseModel):
     isVerified: bool
     createdAt: datetime
     updatedAt: Optional[datetime] = None
+    roles: List[UserRoleDTO]
 
     class Config:
         orm_mode = True
@@ -74,5 +77,6 @@ class UserResponseDTO(BaseModel):
             isActive=user.isActive,
             isVerified=user.isVerified,
             createdAt=user.createdAt,
-            updatedAt=user.updatedAt
+            updatedAt=user.updatedAt,
+            roles=user.roles
         )

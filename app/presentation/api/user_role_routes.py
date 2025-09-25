@@ -1,3 +1,4 @@
+from app.application.dto.user_role_dto import UserRoleDTO
 from app.presentation.decorators.auth import require_roles
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
@@ -15,7 +16,7 @@ from app.application.use_cases.user_role_use_cases import (
 router = APIRouter(prefix="/user-roles", tags=["user-roles"])
 
 
-@router.post("/create", response_model=UserRole, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=UserRoleDTO, status_code=status.HTTP_201_CREATED)
 async def create_user_role(
     data: CreateUserRoleODM,
     _=Depends(require_roles('CoreEngineer')),
@@ -31,7 +32,7 @@ async def create_user_role(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/get", response_model=List[UserRole])
+@router.get("/get", response_model=List[UserRoleDTO])
 async def list_user_roles(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1),
@@ -46,8 +47,7 @@ async def list_user_roles(
     results, total = await use_case.execute(filters, skip, limit)
     return results
 
-
-@router.get("/{id}", response_model=UserRole)
+@router.get("/{id}", response_model=UserRoleDTO)
 async def get_user_role(id: str, _=Depends(require_roles('CoreEngineer'))):
     repo = UserRoleRepositoryImpl()
     use_case = GetUserRoleUseCase(repo)
@@ -57,7 +57,7 @@ async def get_user_role(id: str, _=Depends(require_roles('CoreEngineer'))):
     return result
 
 
-@router.put("/update/{id}", response_model=UserRole)
+@router.put("/update/{id}", response_model=UserRoleDTO)
 async def update_user_role(id: str, data: UpdateUserRoleODM, _=Depends(require_roles('CoreEngineer'))):
     repo = UserRoleRepositoryImpl()
     use_case = UpdateUserRoleUseCase(repo)
