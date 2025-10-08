@@ -8,8 +8,8 @@ def init_supertokens():
     init(
         app_info=InputAppInfo(
             app_name=settings.PROJECT_NAME,
-            api_domain='http://localhost:8000',
-            website_domain='http://localhost:3000',
+            api_domain='https://p01--backend-jubla--48898slpwtw6.code.run',
+            website_domain='http://localhost:3000', #jubla.lat.co
             api_base_path='/api/v1/auth',
             website_base_path='/auth'
         ),
