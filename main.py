@@ -29,7 +29,6 @@ async def shutdown():
 app.add_middleware(
     CustomCORSMiddleware,
     allowed_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
     allowed_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowed_headers=["*"]
 )
