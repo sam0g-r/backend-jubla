@@ -1,5 +1,5 @@
 # ---- Final Stage ----
-FROM python:3.12-slim
+FROM python:3.12.5-slim
 
 ENV PYTHONUNBUFFERED=1
 # Asegura que prisma-client-py descargue el binario correcto en Debian slim
@@ -13,6 +13,7 @@ WORKDIR /app
 # Instalar dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
+    libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Actualizar pip
