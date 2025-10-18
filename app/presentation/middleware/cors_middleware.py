@@ -5,7 +5,7 @@ import re
 from app.shared.config.settings import settings
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from supertokens_python import get_all_cors_headers
+
 
 class CORSMiddleware(BaseHTTPMiddleware):
     def __init__(
@@ -19,7 +19,8 @@ class CORSMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.allowed_origins = allowed_origins or settings.ALLOWED_ORIGINS
         self.allowed_methods = allowed_methods or ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-        self.allowed_headers = ["content-type"] + get_all_cors_headers()
+        # Default allowed headers (add more as needed)
+        self.allowed_headers = allowed_headers or ["content-type", "authorization", "x-requested-with"]
         self.max_age = max_age
 
     async def dispatch(self, request: Request, call_next):

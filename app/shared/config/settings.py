@@ -39,9 +39,6 @@ class Settings(BaseSettings):
     # Resend
     RESEND_API_KEY: str
     RESEND_FROM_EMAIL: str
-
-    # Supertokens
-    SUPERTOKENS_API_KEY: str
     
     # Environment
     ENVIRONMENT: str

@@ -222,7 +222,7 @@ class CreateFullReservationUseCase:
 
         # FIN transacción
 
-        # Crear Supertokens user
+        # Crear user
         await self.user_signup.register(email=data['personalData']['email'], password=hashed_password)
 
         files_record = created.get('files')

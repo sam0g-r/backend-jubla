@@ -1,6 +1,3 @@
-from app.supertokens import init_supertokens
-init_supertokens()
-from supertokens_python.framework.fastapi import get_middleware
 from app.infrastructure.database.prisma_client import prisma_client
 from fastapi import FastAPI
 from app.presentation.middleware.cors_middleware import CORSMiddleware as CustomCORSMiddleware
@@ -14,8 +11,6 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
-
-app.add_middleware(get_middleware())
 
 @app.on_event("startup")
 async def startup():

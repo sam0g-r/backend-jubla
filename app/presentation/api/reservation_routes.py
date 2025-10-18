@@ -1,7 +1,7 @@
 from app.application.dto.reservation_dto import ReservationDTO, ReservationQueryDTO
 from app.application.use_cases.reservation_query_use_case import QueryReservationsUseCase
 from app.domain.entities import user
-from app.infrastructure.services.supertokens_user_signup import SuperTokensUserSignUp
+from app.infrastructure.services.jwt_user_signup import JwtUserSignUp
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 import logging
 from datetime import datetime, date
@@ -48,7 +48,7 @@ async def create_full_reservation(
     event_repo = EventRepositoryImpl()
     reservation_repo = ReservationRepositoryImpl()
     file_repo = FileRepositoryImpl()
-    user_signup = SuperTokensUserSignUp()
+    user_signup = JwtUserSignUp()
     use_case = CreateFullReservationUseCase(user_repo, medical_repo, event_repo, reservation_repo, user_signup=user_signup, file_repo=file_repo)
     try:
         reservation = await use_case.execute(reservation_data.dict())
